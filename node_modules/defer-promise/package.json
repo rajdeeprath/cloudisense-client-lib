@@ -1,0 +1,31 @@
+{
+  "name": "defer-promise",
+  "author": "Lloyd Brookes <75pound@gmail.com>",
+  "version": "2.0.1",
+  "description": "Isomorphic function returning a deferred promise. Uses native `Promise.defer` if available, else polyfills.",
+  "repository": "https://github.com/75lb/defer-promise.git",
+  "license": "MIT",
+  "keywords": [
+    "defer",
+    "promise",
+    "es6",
+    "native",
+    "deferred"
+  ],
+  "main": "dist/index.js",
+  "files": [
+    "index.mjs",
+    "dist/index.js"
+  ],
+  "engines": {
+    "node": ">=6.0.0"
+  },
+  "scripts": {
+    "test": "test-runner test.js",
+    "dist": "rollup -c dist/index.config.js"
+  },
+  "devDependencies": {
+    "rollup": "^0.67.4",
+    "test-runner": "^0.5.1"
+  }
+}

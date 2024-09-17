@@ -1,0 +1,56 @@
+{
+  "name": "cloudmechanik-api-library",
+  "version": "0.0.1",
+  "description": "Api bridge for cloudmechanik service",
+  "main": "lib/index.js",
+  "types": "lib/index.d.ts",
+  "files": [
+    "/lib"
+  ],
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "build": "tsc",
+    "format": "prettier --write \"src/**/*.ts\" \"src/**/*.js\"",
+    "lint": "tslint -p tsconfig.json",
+    "tsc": "tsc",
+    "prod": "tsc && node ./lib/index.js",
+    "debug": "tsc --sourcemap",
+    "compile_linux": "rm -rf ./dist && tsc && tsc --build tsconfig.es5.json",
+    "share_linux": "rm -rf ../cloudmechanik-client-react/src/dist  && cp -R ./dist ../cloudmechanik-client-react/src/dist",
+    "compile": "rmdir /q /S .\\dist && tsc && tsc --build tsconfig.es5.json",
+    "share": "xcopy .\\dist\\ ..\\cloudmechanik-client-react\\src\\dist\\ /E /Y"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/connessionetech/cloudmechanik-client-lib.git"
+  },
+  "keywords": [],
+  "author": "Connessione Technologies",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/connessionetech/cloudmechanik-api-connector/issues"
+  },
+  "homepage": "https://github.com/connessionetech/cloudmechanik-api-connector#readme",
+  "devDependencies": {
+    "@types/node": "^7.0.71",
+    "prettier": "^2.2.1",
+    "ts-node": "^10.0.0",
+    "tsconfig-paths": "^3.9.0",
+    "tslint": "^6.1.3",
+    "tslint-config-prettier": "^1.18.0",
+    "typescript": "^3.9.10"
+  },
+  "dependencies": {
+    "axios": "^0.21.1",
+    "class-transformer": "^0.4.0",
+    "defer-promise": "^2.0.1",
+    "js-base64": "^3.6.1",
+    "js-sha256": "^0.9.0",
+    "json2typescript": "^1.4.1",
+    "nanoid": "^3.1.23",
+    "reflect-metadata": "^0.1.13",
+    "strongly-typed-events": "^2.1.7",
+    "tsify": "^5.0.2",
+    "websocket": "^1.0.34"
+  }
+}
