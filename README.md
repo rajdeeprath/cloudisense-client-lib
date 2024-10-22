@@ -150,3 +150,49 @@ const initializeSocketClient = (dispatch, data) => {
     });
 }
 ```
+
+
+# Build
+---
+
+1. Simple compile - Generate output files
+
+```shell
+    tsc
+```
+
+
+
+2. Compile (Platform specific)
+
+**Linux**
+
+
+```shell
+    rm -rf ./dist && tsc && tsc --build tsconfig.es5.json
+```
+
+
+**Windows**
+
+```shell
+    rmdir /q /S .\\dist && tsc && tsc --build tsconfig.es5.json
+```
+
+
+3. Distribute compiled files for linux to react client project
+
+**Linux**
+
+
+```shell
+    rm -rf ../cloudmechanik-client-react/src/dist  && cp -R ./dist ../cloudmechanik-client-react/src/dist
+```
+
+**Windows**
+
+
+```shell
+    xcopy .\\dist\\ ..\\cloudmechanik-client-react\\src\\dist\\ /E /Y
+```
+    
