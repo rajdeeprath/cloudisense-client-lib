@@ -10,7 +10,8 @@
 /build
 
 # build location
-/dist
+dist/*
+/dist/*
 
 # misc
 .DS_Store
@@ -26,3 +27,4 @@ yarn-debug.log*
 yarn-error.log*
 
 .eslintcache
+
