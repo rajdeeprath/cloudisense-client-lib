@@ -15,12 +15,12 @@
     "tsc": "tsc",
     "format": "prettier --write \"src/**/*.ts\" \"src/**/*.js\"",
     "lint": "tslint -p tsconfig.json",    
-    "prod": "tsc && node ./lib/index.js",
+    "prod": "tsc --sourceMap false && node ./lib/index.js",
     "debug": "tsc --sourcemap",
-    "compile_linux": "rm -rf ./dist && tsc && tsc --build tsconfig.es5.json",
+    "build_linux": "rm -rf ./dist && tsc --sourceMap false && tsc --build tsconfig.es5.json",
     "share_linux": "rm -rf ../cloudisense-client-react/src/dist  && cp -R ./dist ../cloudisense-client-react/src/dist",
-    "compile": "rmdir /q /S .\\dist && tsc && tsc --build tsconfig.es5.json",
-    "share": "xcopy .\\dist\\ ..\\cloudisense-client-react\\src\\dist\\ /E /Y"
+    "compile_win": "rmdir /q /S .\\dist && tsc --sourceMap false && tsc --build tsconfig.es5.json",
+    "share_win": "xcopy .\\dist\\ ..\\cloudisense-client-react\\src\\dist\\ /E /Y"
   },
   "repository": {
     "type": "git",
