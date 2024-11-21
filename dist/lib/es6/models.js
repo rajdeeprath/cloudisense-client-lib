@@ -1,5 +1,5 @@
 /*
-This file is part of `CloudMechanik`
+This file is part of `Cloudisense`
 Copyright 2018 Connessione Technologies
 
 This program is free software: you can redistribute it and/or modify
@@ -19,10 +19,12 @@ var __extends = (this && this.__extends) || (function () {
     var extendStatics = function (d, b) {
         extendStatics = Object.setPrototypeOf ||
             ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||
-            function (d, b) { for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p]; };
+            function (d, b) { for (var p in b) if (Object.prototype.hasOwnProperty.call(b, p)) d[p] = b[p]; };
         return extendStatics(d, b);
     };
     return function (d, b) {
+        if (typeof b !== "function" && b !== null)
+            throw new TypeError("Class extends value " + String(b) + " is not a constructor or null");
         extendStatics(d, b);
         function __() { this.constructor = d; }
         d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
@@ -175,21 +177,21 @@ var TopicData = /** @class */ (function () {
     return TopicData;
 }());
 export { TopicData };
-var CloudMechanikServiceEvent = /** @class */ (function () {
-    function CloudMechanikServiceEvent(name) {
+var CloudisenseServiceEvent = /** @class */ (function () {
+    function CloudisenseServiceEvent(name) {
         this.name = name;
     }
-    return CloudMechanikServiceEvent;
+    return CloudisenseServiceEvent;
 }());
-export { CloudMechanikServiceEvent };
+export { CloudisenseServiceEvent };
 export var EventType;
 (function (EventType) {
     EventType["NOTIFICATION"] = "NOTIFICATION";
     EventType["DATA"] = "DATA";
     EventType["ERROR"] = "ERROR";
 })(EventType || (EventType = {}));
-var CloudMechanikClientEvent = /** @class */ (function () {
-    function CloudMechanikClientEvent(topic, data, meta, note, timestamp) {
+var CloudisenseClientEvent = /** @class */ (function () {
+    function CloudisenseClientEvent(topic, data, meta, note, timestamp) {
         if (topic !== undefined) {
             this.topic = topic;
         }
@@ -206,77 +208,77 @@ var CloudMechanikClientEvent = /** @class */ (function () {
             this.timestamp = timestamp;
         }
     }
-    return CloudMechanikClientEvent;
+    return CloudisenseClientEvent;
 }());
-export { CloudMechanikClientEvent };
-var CloudMechanikClientDataEvent = /** @class */ (function (_super) {
-    __extends(CloudMechanikClientDataEvent, _super);
-    function CloudMechanikClientDataEvent(topic, data, meta, note, timestamp) {
+export { CloudisenseClientEvent };
+var CloudisenseClientDataEvent = /** @class */ (function (_super) {
+    __extends(CloudisenseClientDataEvent, _super);
+    function CloudisenseClientDataEvent(topic, data, meta, note, timestamp) {
         var _this = _super.call(this, topic, data, meta, note, timestamp) || this;
         _this.type = EventType.DATA;
         return _this;
     }
-    return CloudMechanikClientDataEvent;
-}(CloudMechanikClientEvent));
-export { CloudMechanikClientDataEvent };
-var CloudMechanikClientNotificationEvent = /** @class */ (function (_super) {
-    __extends(CloudMechanikClientNotificationEvent, _super);
-    function CloudMechanikClientNotificationEvent(topic, data, meta, note, timestamp) {
+    return CloudisenseClientDataEvent;
+}(CloudisenseClientEvent));
+export { CloudisenseClientDataEvent };
+var CloudisenseClientNotificationEvent = /** @class */ (function (_super) {
+    __extends(CloudisenseClientNotificationEvent, _super);
+    function CloudisenseClientNotificationEvent(topic, data, meta, note, timestamp) {
         var _this = _super.call(this, topic, data, meta, note, timestamp) || this;
         _this.type = EventType.NOTIFICATION;
         return _this;
     }
-    return CloudMechanikClientNotificationEvent;
-}(CloudMechanikClientEvent));
-export { CloudMechanikClientNotificationEvent };
-var CloudMechanikClientErrorEvent = /** @class */ (function (_super) {
-    __extends(CloudMechanikClientErrorEvent, _super);
-    function CloudMechanikClientErrorEvent(topic, data, meta, note, timestamp) {
+    return CloudisenseClientNotificationEvent;
+}(CloudisenseClientEvent));
+export { CloudisenseClientNotificationEvent };
+var CloudisenseClientErrorEvent = /** @class */ (function (_super) {
+    __extends(CloudisenseClientErrorEvent, _super);
+    function CloudisenseClientErrorEvent(topic, data, meta, note, timestamp) {
         var _this = _super.call(this, topic, plainToClass(ErrorData, data), meta, note, timestamp) || this;
         _this.type = EventType.ERROR;
         return _this;
     }
-    return CloudMechanikClientErrorEvent;
-}(CloudMechanikClientEvent));
-export { CloudMechanikClientErrorEvent };
-var CloudMechanikClientSimpleNotificationEvent = /** @class */ (function (_super) {
-    __extends(CloudMechanikClientSimpleNotificationEvent, _super);
-    function CloudMechanikClientSimpleNotificationEvent(topic, data, meta, note, timestamp) {
+    return CloudisenseClientErrorEvent;
+}(CloudisenseClientEvent));
+export { CloudisenseClientErrorEvent };
+var CloudisenseClientSimpleNotificationEvent = /** @class */ (function (_super) {
+    __extends(CloudisenseClientSimpleNotificationEvent, _super);
+    function CloudisenseClientSimpleNotificationEvent(topic, data, meta, note, timestamp) {
         return _super.call(this, topic, plainToClass(SimpleNotificationData, data), meta, note, timestamp) || this;
     }
-    return CloudMechanikClientSimpleNotificationEvent;
-}(CloudMechanikClientNotificationEvent));
-export { CloudMechanikClientSimpleNotificationEvent };
-var CloudMechanikClientDataNotificationEvent = /** @class */ (function (_super) {
-    __extends(CloudMechanikClientDataNotificationEvent, _super);
-    function CloudMechanikClientDataNotificationEvent(topic, data, meta, note, timestamp) {
+    return CloudisenseClientSimpleNotificationEvent;
+}(CloudisenseClientNotificationEvent));
+export { CloudisenseClientSimpleNotificationEvent };
+var CloudisenseClientDataNotificationEvent = /** @class */ (function (_super) {
+    __extends(CloudisenseClientDataNotificationEvent, _super);
+    function CloudisenseClientDataNotificationEvent(topic, data, meta, note, timestamp) {
         return _super.call(this, topic, plainToClass(DatatNotificationData, data), meta, note, timestamp) || this;
     }
-    return CloudMechanikClientDataNotificationEvent;
-}(CloudMechanikClientNotificationEvent));
-export { CloudMechanikClientDataNotificationEvent };
-var CloudMechanikClientLogDataEvent = /** @class */ (function (_super) {
-    __extends(CloudMechanikClientLogDataEvent, _super);
-    function CloudMechanikClientLogDataEvent(topic, data, meta, note, timestamp) {
+    return CloudisenseClientDataNotificationEvent;
+}(CloudisenseClientNotificationEvent));
+export { CloudisenseClientDataNotificationEvent };
+var CloudisenseClientLogDataEvent = /** @class */ (function (_super) {
+    __extends(CloudisenseClientLogDataEvent, _super);
+    function CloudisenseClientLogDataEvent(topic, data, meta, note, timestamp) {
         return _super.call(this, topic, plainToClass(ScriptData, data), meta, note, timestamp) || this;
     }
-    return CloudMechanikClientLogDataEvent;
-}(CloudMechanikClientDataEvent));
-export { CloudMechanikClientLogDataEvent };
-var CloudMechanikClientScriptDataEvent = /** @class */ (function (_super) {
-    __extends(CloudMechanikClientScriptDataEvent, _super);
-    function CloudMechanikClientScriptDataEvent(topic, data, meta, note, timestamp) {
+    return CloudisenseClientLogDataEvent;
+}(CloudisenseClientDataEvent));
+export { CloudisenseClientLogDataEvent };
+var CloudisenseClientScriptDataEvent = /** @class */ (function (_super) {
+    __extends(CloudisenseClientScriptDataEvent, _super);
+    function CloudisenseClientScriptDataEvent(topic, data, meta, note, timestamp) {
         return _super.call(this, topic, plainToClass(ScriptData, data), meta, note, timestamp) || this;
     }
-    return CloudMechanikClientScriptDataEvent;
-}(CloudMechanikClientDataEvent));
-export { CloudMechanikClientScriptDataEvent };
-var CloudMechanikClientStatsDataEvent = /** @class */ (function (_super) {
-    __extends(CloudMechanikClientStatsDataEvent, _super);
-    function CloudMechanikClientStatsDataEvent(topic, data, meta, note, timestamp) {
+    return CloudisenseClientScriptDataEvent;
+}(CloudisenseClientDataEvent));
+export { CloudisenseClientScriptDataEvent };
+var CloudisenseClientStatsDataEvent = /** @class */ (function (_super) {
+    __extends(CloudisenseClientStatsDataEvent, _super);
+    function CloudisenseClientStatsDataEvent(topic, data, meta, note, timestamp) {
         return _super.call(this, topic, plainToClass(Stats, data), meta, note, timestamp) || this;
     }
-    return CloudMechanikClientStatsDataEvent;
-}(CloudMechanikClientDataEvent));
-export { CloudMechanikClientStatsDataEvent };
+    return CloudisenseClientStatsDataEvent;
+}(CloudisenseClientDataEvent));
+export { CloudisenseClientStatsDataEvent };
 //# sourceMappingURL=models.js.map

@@ -1,7 +1,7 @@
 {
-  "name": "cloudmechanik-api-library",
-  "version": "0.0.1",
-  "description": "Api bridge for cloudmechanik service",
+  "name": "cloudisense-api-library",
+  "version": "0.0.2",
+  "description": "Api bridge for cloudisense service",
   "main": "lib/index.js",
   "types": "lib/index.d.ts",
   "files": [
@@ -16,21 +16,21 @@
     "prod": "tsc && node ./lib/index.js",
     "debug": "tsc --sourcemap",
     "compile_linux": "rm -rf ./dist && tsc && tsc --build tsconfig.es5.json",
-    "share_linux": "rm -rf ../cloudmechanik-client-react/src/dist  && cp -R ./dist ../cloudmechanik-client-react/src/dist",
+    "share_linux": "rm -rf ../cloudisense-client-react/src/dist  && cp -R ./dist ../cloudisense-client-react/src/dist",
     "compile": "rmdir /q /S .\\dist && tsc && tsc --build tsconfig.es5.json",
-    "share": "xcopy .\\dist\\ ..\\cloudmechanik-client-react\\src\\dist\\ /E /Y"
+    "share": "xcopy .\\dist\\ ..\\cloudisense-client-react\\src\\dist\\ /E /Y"
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/connessionetech/cloudmechanik-client-lib.git"
+    "url": "git+https://github.com/connessionetech/cloudisense-client-lib.git"
   },
   "keywords": [],
   "author": "Connessione Technologies",
   "license": "ISC",
   "bugs": {
-    "url": "https://github.com/connessionetech/cloudmechanik-api-connector/issues"
+    "url": "https://github.com/connessionetech/cloudisense-api-connector/issues"
   },
-  "homepage": "https://github.com/connessionetech/cloudmechanik-api-connector#readme",
+  "homepage": "https://github.com/connessionetech/cloudisense-api-connector#readme",
   "devDependencies": {
     "@types/node": "^7.0.71",
     "prettier": "^2.2.1",

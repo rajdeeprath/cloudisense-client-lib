@@ -106,7 +106,7 @@ export declare class TopicData {
     timestamp: number;
     constructor(topic: string, data?: object);
 }
-export declare class CloudMechanikServiceEvent {
+export declare class CloudisenseServiceEvent {
     name: string;
     topic: string;
     state: string;
@@ -121,7 +121,7 @@ export declare enum EventType {
     DATA = "DATA",
     ERROR = "ERROR"
 }
-export declare abstract class CloudMechanikClientEvent {
+export declare abstract class CloudisenseClientEvent {
     topic: string;
     data: any;
     meta: any;
@@ -129,30 +129,30 @@ export declare abstract class CloudMechanikClientEvent {
     timestamp: number;
     constructor(topic: string, data: any, meta: any, note: string, timestamp: number);
 }
-export declare abstract class CloudMechanikClientDataEvent extends CloudMechanikClientEvent {
+export declare abstract class CloudisenseClientDataEvent extends CloudisenseClientEvent {
     type: EventType;
     constructor(topic: string, data: any, meta: any, note: string, timestamp: number);
 }
-export declare abstract class CloudMechanikClientNotificationEvent extends CloudMechanikClientEvent {
+export declare abstract class CloudisenseClientNotificationEvent extends CloudisenseClientEvent {
     type: EventType;
     constructor(topic: string, data: any, meta: any, note: string, timestamp: number);
 }
-export declare class CloudMechanikClientErrorEvent extends CloudMechanikClientEvent {
+export declare class CloudisenseClientErrorEvent extends CloudisenseClientEvent {
     type: EventType;
     constructor(topic: string, data: any, meta: any, note: string, timestamp: number);
 }
-export declare class CloudMechanikClientSimpleNotificationEvent extends CloudMechanikClientNotificationEvent {
+export declare class CloudisenseClientSimpleNotificationEvent extends CloudisenseClientNotificationEvent {
     constructor(topic: string, data: any, meta: any, note: string, timestamp: number);
 }
-export declare class CloudMechanikClientDataNotificationEvent extends CloudMechanikClientNotificationEvent {
+export declare class CloudisenseClientDataNotificationEvent extends CloudisenseClientNotificationEvent {
     constructor(topic: string, data: any, meta: any, note: string, timestamp: number);
 }
-export declare class CloudMechanikClientLogDataEvent extends CloudMechanikClientDataEvent {
+export declare class CloudisenseClientLogDataEvent extends CloudisenseClientDataEvent {
     constructor(topic: string, data: any, meta: any, note: string, timestamp: number);
 }
-export declare class CloudMechanikClientScriptDataEvent extends CloudMechanikClientDataEvent {
+export declare class CloudisenseClientScriptDataEvent extends CloudisenseClientDataEvent {
     constructor(topic: string, data: any, meta: any, note: string, timestamp: number);
 }
-export declare class CloudMechanikClientStatsDataEvent extends CloudMechanikClientDataEvent {
+export declare class CloudisenseClientStatsDataEvent extends CloudisenseClientDataEvent {
     constructor(topic: string, data: any, meta: any, note: string, timestamp: number);
 }

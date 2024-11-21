@@ -1,5 +1,5 @@
 /*
-This file is part of `CloudMechanik` 
+This file is part of `Cloudisense` 
 Copyright 2018 Connessione Technologies
 
 This program is free software: you can redistribute it and/or modify
@@ -23,14 +23,14 @@ import { sha256, sha224 } from 'js-sha256';
 import { EventList, IEventHandler } from "strongly-typed-events";
 import { ClientEventProvider } from "./event/eventprovider";
 import { Base64 } from 'js-base64';
-import { CloudMechanikServiceEvent, ClientStateType, ClientState, LogData, LogInfo, Credentials, ScriptData, Stats, SimpleNotificationData, CloudMechanikClientStatsDataEvent, CloudMechanikClientLogDataEvent, CloudMechanikClientSimpleNotificationEvent, CloudMechanikClientErrorEvent } from "./models";
+import { CloudisenseServiceEvent as CloudisenseServiceEvent, ClientStateType, ClientState, LogData, LogInfo, Credentials, ScriptData, Stats, SimpleNotificationData, CloudisenseClientStatsDataEvent as CloudisenseClientStatsDataEvent, CloudisenseClientLogDataEvent as CloudisenseClientLogDataEvent, CloudisenseClientSimpleNotificationEvent as CloudisenseClientSimpleNotificationEvent, CloudisenseClientErrorEvent as CloudisenseClientErrorEvent } from "./models";
 import { TOPIC_SCRIPT_MONITORING, TOPIC_LOG_MONITORING, TOPIC_STATS_MONITORING, TOPIC_DELEGATE_MONITORING} from "./event/events";
 import * as CHANNEL_STATES from './event/channelstates'
 import * as EVENTS from './event/events'
 import axios from 'axios';
 
 
-export class CloudMechanikApiClient extends ClientEventProvider implements IServiceClient {
+export class CloudisenseApiClient extends ClientEventProvider implements IServiceClient {
 
     host: string;
     port: number;
@@ -530,7 +530,7 @@ export class CloudMechanikApiClient extends ClientEventProvider implements IServ
 
         if(this._lastCredentials != undefined && this._lastCredentials != null){
 
-            if(this._errorCount<CloudMechanikApiClient.MAX_ERROR_TOLERANCE){
+            if(this._errorCount<CloudisenseApiClient.MAX_ERROR_TOLERANCE){
                 
                 setTimeout(() => {
                     this.connect(this._lastCredentials.username, this._lastCredentials.password);    
@@ -554,7 +554,7 @@ export class CloudMechanikApiClient extends ClientEventProvider implements IServ
 
         if(data["type"] == "event")
         {
-            let event:CloudMechanikServiceEvent = data as CloudMechanikServiceEvent      
+            let event:CloudisenseServiceEvent = data as CloudisenseServiceEvent      
             let notificationData = undefined;
             this._onClientStateUpdate.dispatch(new ClientState(ClientStateType.EVENT_RECEIVED))
             console.log(JSON.stringify(event))               
@@ -566,13 +566,13 @@ export class CloudMechanikApiClient extends ClientEventProvider implements IServ
                     break;
                 
                 case EVENTS.TEXT_NOTIFICATION_EVENT:
-                    this._onTextNotificationEvent.dispatchAsync(new CloudMechanikClientSimpleNotificationEvent(event.topic, event.data, event.meta, event.note, event.timestamp))
+                    this._onTextNotificationEvent.dispatchAsync(new CloudisenseClientSimpleNotificationEvent(event.topic, event.data, event.meta, event.note, event.timestamp))
                     break;  
                 
 
                 case EVENTS.TEXT_DATA_NOTIFICATION_EVENT:
                     console.debug("data notification event")
-                    this._onTextNotificationEvent.dispatchAsync(new CloudMechanikClientSimpleNotificationEvent(event.topic, event.data, event.meta, event.note, event.timestamp))
+                    this._onTextNotificationEvent.dispatchAsync(new CloudisenseClientSimpleNotificationEvent(event.topic, event.data, event.meta, event.note, event.timestamp))
                     this._dispatchTopicOrientedDataEvent(event)                    
                     break
 
@@ -598,7 +598,7 @@ export class CloudMechanikApiClient extends ClientEventProvider implements IServ
      * Dispatches topic specific error event with topic specific data 
      * @param event 
      */
-    private _dispatchTopicOrientedErrorEvent(event:CloudMechanikServiceEvent):void
+    private _dispatchTopicOrientedErrorEvent(event:CloudisenseServiceEvent):void
     {
 
         const topic:string = event.topic
@@ -606,19 +606,19 @@ export class CloudMechanikApiClient extends ClientEventProvider implements IServ
         switch(topic)
         {
             case (topic.startsWith(TOPIC_LOG_MONITORING))?topic:null:
-                this._topicevents.get(topic).dispatchAsync(this, new CloudMechanikClientErrorEvent(event.topic, event.data, event.meta, event.note, event.timestamp))
+                this._topicevents.get(topic).dispatchAsync(this, new CloudisenseClientErrorEvent(event.topic, event.data, event.meta, event.note, event.timestamp))
                 break;
 
             case (topic.startsWith(TOPIC_SCRIPT_MONITORING))?topic:null:
-                this._topicevents.get(topic).dispatchAsync(this, new CloudMechanikClientErrorEvent(event.topic, event.data, event.meta, event.note, event.timestamp))
+                this._topicevents.get(topic).dispatchAsync(this, new CloudisenseClientErrorEvent(event.topic, event.data, event.meta, event.note, event.timestamp))
                 break;
 
             case (topic.startsWith(TOPIC_STATS_MONITORING))?topic:null:
-                this._topicevents.get(topic).dispatchAsync(this, new CloudMechanikClientErrorEvent(event.topic, event.data, event.meta, event.note, event.timestamp))
+                this._topicevents.get(topic).dispatchAsync(this, new CloudisenseClientErrorEvent(event.topic, event.data, event.meta, event.note, event.timestamp))
                 break;
 
             case (topic.startsWith(TOPIC_DELEGATE_MONITORING))?topic:null:
-                this._topicevents.get(topic).dispatchAsync(this, new CloudMechanikClientErrorEvent(event.topic, event.data, event.meta, event.note, event.timestamp))
+                this._topicevents.get(topic).dispatchAsync(this, new CloudisenseClientErrorEvent(event.topic, event.data, event.meta, event.note, event.timestamp))
                 break;    
 
             default:
@@ -634,7 +634,7 @@ export class CloudMechanikApiClient extends ClientEventProvider implements IServ
      * Dispatches topic specific event with topic specific data 
      * @param event 
      */
-    private _dispatchTopicOrientedDataEvent(event:CloudMechanikServiceEvent):void
+    private _dispatchTopicOrientedDataEvent(event:CloudisenseServiceEvent):void
     {
         const topic:string = event.topic
 
@@ -642,15 +642,15 @@ export class CloudMechanikApiClient extends ClientEventProvider implements IServ
         {
 
             case (topic.startsWith(TOPIC_LOG_MONITORING))?topic:null:
-                this._topicevents.get(topic).dispatchAsync(this, new CloudMechanikClientLogDataEvent(event.topic, event.data, event.meta, event.note, event.timestamp))
+                this._topicevents.get(topic).dispatchAsync(this, new CloudisenseClientLogDataEvent(event.topic, event.data, event.meta, event.note, event.timestamp))
                 break;
 
             case (topic.startsWith(TOPIC_SCRIPT_MONITORING))?topic:null:
-                this._topicevents.get(topic).dispatchAsync(this, new CloudMechanikClientStatsDataEvent(event.topic, event.data, event.meta, event.note, event.timestamp))
+                this._topicevents.get(topic).dispatchAsync(this, new CloudisenseClientStatsDataEvent(event.topic, event.data, event.meta, event.note, event.timestamp))
                 break;
 
             case (topic.startsWith(TOPIC_STATS_MONITORING))?topic:null:
-                this._topicevents.get(topic).dispatchAsync(this, new CloudMechanikClientStatsDataEvent(event.topic, event.data, event.meta, event.note, event.timestamp))
+                this._topicevents.get(topic).dispatchAsync(this, new CloudisenseClientStatsDataEvent(event.topic, event.data, event.meta, event.note, event.timestamp))
                 break;
             
             case (topic.startsWith(TOPIC_DELEGATE_MONITORING))?topic:null:

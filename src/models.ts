@@ -1,6 +1,6 @@
 
 /*
-This file is part of `CloudMechanik` 
+This file is part of `Cloudisense` 
 Copyright 2018 Connessione Technologies
 
 This program is free software: you can redistribute it and/or modify
@@ -237,7 +237,7 @@ export class TopicData {
 }
 
 
-export class CloudMechanikServiceEvent{
+export class CloudisenseServiceEvent{
     name:string    
     topic!:string    
     state!:string
@@ -258,7 +258,7 @@ export enum EventType {
     ERROR = "ERROR"
 }
 
-export abstract class CloudMechanikClientEvent{
+export abstract class CloudisenseClientEvent{
     topic!:string
     data:any
     meta!: any
@@ -290,14 +290,14 @@ export abstract class CloudMechanikClientEvent{
 }
 
 
-export abstract class CloudMechanikClientDataEvent extends CloudMechanikClientEvent{
+export abstract class CloudisenseClientDataEvent extends CloudisenseClientEvent{
     type:EventType = EventType.DATA
     constructor(topic:string, data:any, meta:any, note:string, timestamp:number){
         super(topic, data, meta, note, timestamp)
     }
 }
 
-export abstract class CloudMechanikClientNotificationEvent extends CloudMechanikClientEvent{
+export abstract class CloudisenseClientNotificationEvent extends CloudisenseClientEvent{
     type:EventType = EventType.NOTIFICATION
     constructor(topic:string, data:any, meta:any, note:string, timestamp:number){
         super(topic, data, meta, note, timestamp)
@@ -305,7 +305,7 @@ export abstract class CloudMechanikClientNotificationEvent extends CloudMechanik
 }
 
 
-export class CloudMechanikClientErrorEvent extends CloudMechanikClientEvent{
+export class CloudisenseClientErrorEvent extends CloudisenseClientEvent{
     type:EventType = EventType.ERROR
     constructor(topic:string, data:any, meta:any, note:string, timestamp:number){
         super(topic, plainToClass(ErrorData, data), meta, note, timestamp)        
@@ -313,33 +313,33 @@ export class CloudMechanikClientErrorEvent extends CloudMechanikClientEvent{
 }
 
 
-export class CloudMechanikClientSimpleNotificationEvent extends CloudMechanikClientNotificationEvent{
+export class CloudisenseClientSimpleNotificationEvent extends CloudisenseClientNotificationEvent{
     constructor(topic:string, data:any, meta:any, note:string, timestamp:number){
         super(topic, plainToClass(SimpleNotificationData, data), meta, note, timestamp)        
     }    
 }
 
-export class CloudMechanikClientDataNotificationEvent extends CloudMechanikClientNotificationEvent{
+export class CloudisenseClientDataNotificationEvent extends CloudisenseClientNotificationEvent{
     constructor(topic:string, data:any, meta:any, note:string, timestamp:number){
         super(topic, plainToClass(DatatNotificationData, data), meta, note, timestamp)        
     }    
 }
 
-export class CloudMechanikClientLogDataEvent extends CloudMechanikClientDataEvent{
+export class CloudisenseClientLogDataEvent extends CloudisenseClientDataEvent{
     constructor(topic:string, data:any, meta:any, note:string, timestamp:number){
         super(topic, plainToClass(ScriptData, data), meta, note, timestamp)
     }  
 }
 
 
-export class CloudMechanikClientScriptDataEvent extends CloudMechanikClientDataEvent{
+export class CloudisenseClientScriptDataEvent extends CloudisenseClientDataEvent{
     constructor(topic:string, data:any, meta:any, note:string, timestamp:number){
         super(topic, plainToClass(ScriptData, data), meta, note, timestamp)
     } 
 }
 
 
-export class CloudMechanikClientStatsDataEvent extends CloudMechanikClientDataEvent{
+export class CloudisenseClientStatsDataEvent extends CloudisenseClientDataEvent{
     constructor(topic:string, data:any, meta:any, note:string, timestamp:number){
         super(topic, plainToClass(Stats, data), meta, note, timestamp)
     } 
