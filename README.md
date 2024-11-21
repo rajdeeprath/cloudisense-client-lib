@@ -1,4 +1,4 @@
-# cloudisense API Library
+# Cloudisense API Library
 
 ## ABOUT
 ---
