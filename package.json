@@ -1,18 +1,20 @@
 {
   "name": "cloudisense-api-library",
-  "version": "0.0.2",
-  "description": "Api bridge for cloudisense service",
+  "version": "0.0.1",
+  "description": "Api bridge for cloudisense client & service",
   "main": "lib/index.js",
+  "module": "dist/index.esm.js",
   "types": "lib/index.d.ts",
+  "author": "Connessione Technologies connessionetechnologies@gmail.com",
+  "license": "Apache 2.0",
   "files": [
     "/lib"
   ],
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
     "build": "tsc",
-    "format": "prettier --write \"src/**/*.ts\" \"src/**/*.js\"",
-    "lint": "tslint -p tsconfig.json",
     "tsc": "tsc",
+    "format": "prettier --write \"src/**/*.ts\" \"src/**/*.js\"",
+    "lint": "tslint -p tsconfig.json",    
     "prod": "tsc && node ./lib/index.js",
     "debug": "tsc --sourcemap",
     "compile_linux": "rm -rf ./dist && tsc && tsc --build tsconfig.es5.json",
@@ -24,9 +26,7 @@
     "type": "git",
     "url": "git+https://github.com/connessionetech/cloudisense-client-lib.git"
   },
-  "keywords": [],
-  "author": "Connessione Technologies",
-  "license": "ISC",
+  "keywords": [],  
   "bugs": {
     "url": "https://github.com/connessionetech/cloudisense-api-connector/issues"
   },
