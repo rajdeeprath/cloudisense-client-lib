@@ -18,9 +18,9 @@
     "prod": "tsc --sourceMap false && node ./lib/index.js",
     "debug": "tsc --sourcemap",
     "build_linux": "rm -rf ./dist && tsc --sourceMap false && tsc --build tsconfig.es5.json",
-    "share_linux": "rm -rf ../cloudisense-client-react/src/lib  && cp -R ./dist/es6 ../cloudisense-client-react/src/lib",
+    "share_linux": "rm -rf ../cloudisense-client-react/src/lib  && cp -R ./dist/lib/es6 ../cloudisense-client-react/src/lib",
     "build_win": "rmdir /q /S .\\dist && tsc --sourceMap false && tsc --build tsconfig.es5.json",
-    "share_win": "rmdir /q /S ..\\cloudisense-client-react\\src\\lib && xcopy .\\dist\\es6 ..\\cloudisense-client-react\\src\\lib\\ /E /Y"
+    "share_win": "rmdir /q /S ..\\cloudisense-client-react\\src\\lib && xcopy .\\dist\\lib\\es6 ..\\cloudisense-client-react\\src\\lib\\ /E /Y"
   },
   "repository": {
     "type": "git",
