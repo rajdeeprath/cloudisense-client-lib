@@ -1,5 +1,5 @@
 /*
-This file is part of `CloudMechanik` 
+This file is part of `Cloudisense` 
 Copyright 2018 Connessione Technologies
 
 This program is free software: you can redistribute it and/or modify
@@ -18,7 +18,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 import { IClientChannel, IServiceChannel,IServiceClient} from "../interfaces";
 import { SignalDispatcher, SimpleEventDispatcher, EventDispatcher, ISimpleEvent } from "strongly-typed-events";
-import { CloudMechanikClientDataNotificationEvent, CloudMechanikClientSimpleNotificationEvent, SimpleNotificationData } from "../models";
+import { CloudisenseClientDataNotificationEvent, CloudisenseClientSimpleNotificationEvent, SimpleNotificationData } from "../models";
 
 
 export class ChannelEventProvider implements IServiceChannel {
@@ -47,8 +47,8 @@ export class ChannelEventProvider implements IServiceChannel {
 
 export class ClientEventProvider implements IClientChannel {
     /* Events */
-    _onTextNotificationEvent = new SimpleEventDispatcher<CloudMechanikClientSimpleNotificationEvent>();
-    _onTextDataNotificationEvent = new SimpleEventDispatcher<CloudMechanikClientDataNotificationEvent>();
+    _onTextNotificationEvent = new SimpleEventDispatcher<CloudisenseClientSimpleNotificationEvent>();
+    _onTextDataNotificationEvent = new SimpleEventDispatcher<CloudisenseClientDataNotificationEvent>();
     _onDataEvent = new SimpleEventDispatcher<any>();
     _onClientStateUpdate = new SimpleEventDispatcher<any>();
 

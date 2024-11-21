@@ -1,5 +1,5 @@
 /*
-This file is part of `CloudMechanik` 
+This file is part of `Cloudisense` 
 Copyright 2018 Connessione Technologies
 
 This program is free software: you can redistribute it and/or modify
@@ -16,10 +16,10 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-import {CloudMechanikApiClient} from './client'
+import {CloudisenseApiClient} from './client'
 import { ClientState, ClientStateType } from './models'
 
-const client = new CloudMechanikApiClient({        
+const client = new CloudisenseApiClient({        
     host: "localhost",
     port: 8000,
     reconnectOnFailure: false

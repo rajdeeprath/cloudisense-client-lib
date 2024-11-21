@@ -1,5 +1,5 @@
 /*
-This file is part of `CloudMechanik`
+This file is part of `Cloudisense`
 Copyright 2018 Connessione Technologies
 
 This program is free software: you can redistribute it and/or modify
@@ -15,4 +15,5 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
+export {};
 //# sourceMappingURL=interfaces.js.map

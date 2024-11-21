@@ -1,5 +1,5 @@
 /*
-This file is part of `CloudMechanik`
+This file is part of `Cloudisense`
 Copyright 2018 Connessione Technologies
 
 This program is free software: you can redistribute it and/or modify
@@ -19,10 +19,12 @@ var __extends = (this && this.__extends) || (function () {
     var extendStatics = function (d, b) {
         extendStatics = Object.setPrototypeOf ||
             ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||
-            function (d, b) { for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p]; };
+            function (d, b) { for (var p in b) if (Object.prototype.hasOwnProperty.call(b, p)) d[p] = b[p]; };
         return extendStatics(d, b);
     };
     return function (d, b) {
+        if (typeof b !== "function" && b !== null)
+            throw new TypeError("Class extends value " + String(b) + " is not a constructor or null");
         extendStatics(d, b);
         function __() { this.constructor = d; }
         d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
@@ -34,14 +36,14 @@ import { sha256 } from 'js-sha256';
 import { EventList } from "strongly-typed-events";
 import { ClientEventProvider } from "./event/eventprovider";
 import { Base64 } from 'js-base64';
-import { ClientStateType, ClientState, Credentials, CloudMechanikClientStatsDataEvent, CloudMechanikClientLogDataEvent, CloudMechanikClientSimpleNotificationEvent, CloudMechanikClientErrorEvent } from "./models";
+import { ClientStateType, ClientState, Credentials, CloudisenseClientStatsDataEvent as CloudisenseClientStatsDataEvent, CloudisenseClientLogDataEvent as CloudisenseClientLogDataEvent, CloudisenseClientSimpleNotificationEvent as CloudisenseClientSimpleNotificationEvent, CloudisenseClientErrorEvent as CloudisenseClientErrorEvent } from "./models";
 import { TOPIC_SCRIPT_MONITORING, TOPIC_LOG_MONITORING, TOPIC_STATS_MONITORING, TOPIC_DELEGATE_MONITORING } from "./event/events";
 import * as CHANNEL_STATES from './event/channelstates';
 import * as EVENTS from './event/events';
 import axios from 'axios';
-var CloudMechanikApiClient = /** @class */ (function (_super) {
-    __extends(CloudMechanikApiClient, _super);
-    function CloudMechanikApiClient(config) {
+var CloudisenseApiClient = /** @class */ (function (_super) {
+    __extends(CloudisenseApiClient, _super);
+    function CloudisenseApiClient(config) {
         var _this = _super.call(this) || this;
         _this._topicevents = new EventList();
         _this._errorCount = 0;
@@ -58,7 +60,7 @@ var CloudMechanikApiClient = /** @class */ (function (_super) {
      * @param topicname topic name to subscribe to
      * @param fn subscriber handler function
      */
-    CloudMechanikApiClient.prototype.subscribeTopic = function (topicname, fn) {
+    CloudisenseApiClient.prototype.subscribeTopic = function (topicname, fn) {
         this._topicevents.get(topicname).subscribe(fn);
     };
     /**
@@ -67,7 +69,7 @@ var CloudMechanikApiClient = /** @class */ (function (_super) {
      * @param topicname topic name to unsubscribe from
      * @param fn subscriber handler function
      */
-    CloudMechanikApiClient.prototype.unsubscribeTopic = function (topicname, fn) {
+    CloudisenseApiClient.prototype.unsubscribeTopic = function (topicname, fn) {
         this._topicevents.get(topicname).unsubscribe(fn);
     };
     /**
@@ -76,7 +78,7 @@ var CloudMechanikApiClient = /** @class */ (function (_super) {
      * @param topicname
      * @param fn
      */
-    CloudMechanikApiClient.prototype.hasTopicHandler = function (topicname, fn) {
+    CloudisenseApiClient.prototype.hasTopicHandler = function (topicname, fn) {
         return this._topicevents.get(topicname).has(fn);
     };
     /**
@@ -84,7 +86,7 @@ var CloudMechanikApiClient = /** @class */ (function (_super) {
      *
      * @returns
      */
-    CloudMechanikApiClient.prototype.read_file = function (path) {
+    CloudisenseApiClient.prototype.read_file = function (path) {
         var _this = this;
         var promise = new Promise(function (resolve, reject) {
             var url = _this.getBaseAPIendPoint() + "/file/read";
@@ -118,7 +120,7 @@ var CloudMechanikApiClient = /** @class */ (function (_super) {
      *
      * @returns
      */
-    CloudMechanikApiClient.prototype.write_file = function (path, content) {
+    CloudisenseApiClient.prototype.write_file = function (path, content) {
         var _this = this;
         var promise = new Promise(function (resolve, reject) {
             var url = _this.getBaseAPIendPoint() + "/file/write";
@@ -153,7 +155,7 @@ var CloudMechanikApiClient = /** @class */ (function (_super) {
      *
      * @returns Promise that resolved to List of logs
      */
-    CloudMechanikApiClient.prototype.get_logs = function () {
+    CloudisenseApiClient.prototype.get_logs = function () {
         var _this = this;
         return new Promise(function (resolve, reject) {
             var promise = _this._socketservice.doRPC("list_logs");
@@ -169,7 +171,7 @@ var CloudMechanikApiClient = /** @class */ (function (_super) {
      *
      * @returns Promise that resolved to subscribable topic path for the data channel for stats
      */
-    CloudMechanikApiClient.prototype.subscribe_stats = function () {
+    CloudisenseApiClient.prototype.subscribe_stats = function () {
         var _this = this;
         return new Promise(function (resolve, reject) {
             var payload = {
@@ -189,7 +191,7 @@ var CloudMechanikApiClient = /** @class */ (function (_super) {
      * @param logkey
      * @returns Promise that resolved to subscribable topic path for the data channel of thsi log
      */
-    CloudMechanikApiClient.prototype.subscribe_log = function (logkey) {
+    CloudisenseApiClient.prototype.subscribe_log = function (logkey) {
         var _this = this;
         return new Promise(function (resolve, reject) {
             var payload = {
@@ -210,7 +212,7 @@ var CloudMechanikApiClient = /** @class */ (function (_super) {
      * @param logkey
      * @returns
      */
-    CloudMechanikApiClient.prototype.unsubscribe_log = function (logkey) {
+    CloudisenseApiClient.prototype.unsubscribe_log = function (logkey) {
         var _this = this;
         return new Promise(function (resolve, reject) {
             var payload = {
@@ -230,7 +232,7 @@ var CloudMechanikApiClient = /** @class */ (function (_super) {
      * @param logkey
      * @returns
      */
-    CloudMechanikApiClient.prototype.download_log = function (logkey) {
+    CloudisenseApiClient.prototype.download_log = function (logkey) {
         var _this = this;
         var promise = new Promise(function (resolve, reject) {
             var url = _this.getBaseAPIendPoint() + "/log/download/static";
@@ -263,7 +265,7 @@ var CloudMechanikApiClient = /** @class */ (function (_super) {
      *
      * @returns
      */
-    CloudMechanikApiClient.prototype.get_system_services = function () {
+    CloudisenseApiClient.prototype.get_system_services = function () {
         var _this = this;
         return new Promise(function (resolve, reject) {
             var promise = _this._socketservice.doRPC("list_targets");
@@ -280,7 +282,7 @@ var CloudMechanikApiClient = /** @class */ (function (_super) {
      * @param name
      * @returns
      */
-    CloudMechanikApiClient.prototype.start_service = function (name) {
+    CloudisenseApiClient.prototype.start_service = function (name) {
         var _this = this;
         return new Promise(function (resolve, reject) {
             var payload = {
@@ -300,7 +302,7 @@ var CloudMechanikApiClient = /** @class */ (function (_super) {
      * @param name
      * @returns
      */
-    CloudMechanikApiClient.prototype.stop_service = function (name) {
+    CloudisenseApiClient.prototype.stop_service = function (name) {
         var _this = this;
         return new Promise(function (resolve, reject) {
             var payload = {
@@ -320,7 +322,7 @@ var CloudMechanikApiClient = /** @class */ (function (_super) {
      * @param name
      * @returns
      */
-    CloudMechanikApiClient.prototype.restart_service = function (name) {
+    CloudisenseApiClient.prototype.restart_service = function (name) {
         var _this = this;
         return new Promise(function (resolve, reject) {
             var payload = {
@@ -341,7 +343,7 @@ var CloudMechanikApiClient = /** @class */ (function (_super) {
      * @param password
      * @returns
      */
-    CloudMechanikApiClient.prototype.connect = function (username, password) {
+    CloudisenseApiClient.prototype.connect = function (username, password) {
         var _this = this;
         console.log("connecting to service");
         return new Promise(function (resolve, reject) {
@@ -415,11 +417,11 @@ var CloudMechanikApiClient = /** @class */ (function (_super) {
     /**
      * Attempts to reconenct back to service using last successful credentials
      */
-    CloudMechanikApiClient.prototype.attemptReconnect = function () {
+    CloudisenseApiClient.prototype.attemptReconnect = function () {
         var _this = this;
         console.log("Attempting to reconnect");
         if (this._lastCredentials != undefined && this._lastCredentials != null) {
-            if (this._errorCount < CloudMechanikApiClient.MAX_ERROR_TOLERANCE) {
+            if (this._errorCount < CloudisenseApiClient.MAX_ERROR_TOLERANCE) {
                 setTimeout(function () {
                     _this.connect(_this._lastCredentials.username, _this._lastCredentials.password);
                 }, 5000);
@@ -434,7 +436,7 @@ var CloudMechanikApiClient = /** @class */ (function (_super) {
      *
      * @param data
      */
-    CloudMechanikApiClient.prototype.processChannelData = function (data) {
+    CloudisenseApiClient.prototype.processChannelData = function (data) {
         if (data["type"] == "event") {
             var event_1 = data;
             var notificationData = undefined;
@@ -445,11 +447,11 @@ var CloudMechanikApiClient = /** @class */ (function (_super) {
                     console.debug("Server ping message");
                     break;
                 case EVENTS.TEXT_NOTIFICATION_EVENT:
-                    this._onTextNotificationEvent.dispatchAsync(new CloudMechanikClientSimpleNotificationEvent(event_1.topic, event_1.data, event_1.meta, event_1.note, event_1.timestamp));
+                    this._onTextNotificationEvent.dispatchAsync(new CloudisenseClientSimpleNotificationEvent(event_1.topic, event_1.data, event_1.meta, event_1.note, event_1.timestamp));
                     break;
                 case EVENTS.TEXT_DATA_NOTIFICATION_EVENT:
                     console.debug("data notification event");
-                    this._onTextNotificationEvent.dispatchAsync(new CloudMechanikClientSimpleNotificationEvent(event_1.topic, event_1.data, event_1.meta, event_1.note, event_1.timestamp));
+                    this._onTextNotificationEvent.dispatchAsync(new CloudisenseClientSimpleNotificationEvent(event_1.topic, event_1.data, event_1.meta, event_1.note, event_1.timestamp));
                     this._dispatchTopicOrientedDataEvent(event_1);
                     break;
                 case EVENTS.ERROR_EVENT:
@@ -468,20 +470,20 @@ var CloudMechanikApiClient = /** @class */ (function (_super) {
      * Dispatches topic specific error event with topic specific data
      * @param event
      */
-    CloudMechanikApiClient.prototype._dispatchTopicOrientedErrorEvent = function (event) {
+    CloudisenseApiClient.prototype._dispatchTopicOrientedErrorEvent = function (event) {
         var topic = event.topic;
         switch (topic) {
             case (topic.startsWith(TOPIC_LOG_MONITORING)) ? topic : null:
-                this._topicevents.get(topic).dispatchAsync(this, new CloudMechanikClientErrorEvent(event.topic, event.data, event.meta, event.note, event.timestamp));
+                this._topicevents.get(topic).dispatchAsync(this, new CloudisenseClientErrorEvent(event.topic, event.data, event.meta, event.note, event.timestamp));
                 break;
             case (topic.startsWith(TOPIC_SCRIPT_MONITORING)) ? topic : null:
-                this._topicevents.get(topic).dispatchAsync(this, new CloudMechanikClientErrorEvent(event.topic, event.data, event.meta, event.note, event.timestamp));
+                this._topicevents.get(topic).dispatchAsync(this, new CloudisenseClientErrorEvent(event.topic, event.data, event.meta, event.note, event.timestamp));
                 break;
             case (topic.startsWith(TOPIC_STATS_MONITORING)) ? topic : null:
-                this._topicevents.get(topic).dispatchAsync(this, new CloudMechanikClientErrorEvent(event.topic, event.data, event.meta, event.note, event.timestamp));
+                this._topicevents.get(topic).dispatchAsync(this, new CloudisenseClientErrorEvent(event.topic, event.data, event.meta, event.note, event.timestamp));
                 break;
             case (topic.startsWith(TOPIC_DELEGATE_MONITORING)) ? topic : null:
-                this._topicevents.get(topic).dispatchAsync(this, new CloudMechanikClientErrorEvent(event.topic, event.data, event.meta, event.note, event.timestamp));
+                this._topicevents.get(topic).dispatchAsync(this, new CloudisenseClientErrorEvent(event.topic, event.data, event.meta, event.note, event.timestamp));
                 break;
             default:
                 console.debug("Event for topic:" + topic);
@@ -492,17 +494,17 @@ var CloudMechanikApiClient = /** @class */ (function (_super) {
      * Dispatches topic specific event with topic specific data
      * @param event
      */
-    CloudMechanikApiClient.prototype._dispatchTopicOrientedDataEvent = function (event) {
+    CloudisenseApiClient.prototype._dispatchTopicOrientedDataEvent = function (event) {
         var topic = event.topic;
         switch (topic) {
             case (topic.startsWith(TOPIC_LOG_MONITORING)) ? topic : null:
-                this._topicevents.get(topic).dispatchAsync(this, new CloudMechanikClientLogDataEvent(event.topic, event.data, event.meta, event.note, event.timestamp));
+                this._topicevents.get(topic).dispatchAsync(this, new CloudisenseClientLogDataEvent(event.topic, event.data, event.meta, event.note, event.timestamp));
                 break;
             case (topic.startsWith(TOPIC_SCRIPT_MONITORING)) ? topic : null:
-                this._topicevents.get(topic).dispatchAsync(this, new CloudMechanikClientStatsDataEvent(event.topic, event.data, event.meta, event.note, event.timestamp));
+                this._topicevents.get(topic).dispatchAsync(this, new CloudisenseClientStatsDataEvent(event.topic, event.data, event.meta, event.note, event.timestamp));
                 break;
             case (topic.startsWith(TOPIC_STATS_MONITORING)) ? topic : null:
-                this._topicevents.get(topic).dispatchAsync(this, new CloudMechanikClientStatsDataEvent(event.topic, event.data, event.meta, event.note, event.timestamp));
+                this._topicevents.get(topic).dispatchAsync(this, new CloudisenseClientStatsDataEvent(event.topic, event.data, event.meta, event.note, event.timestamp));
                 break;
             case (topic.startsWith(TOPIC_DELEGATE_MONITORING)) ? topic : null:
                 // Delegate data object to be engineered
@@ -513,7 +515,7 @@ var CloudMechanikApiClient = /** @class */ (function (_super) {
                 break;
         }
     };
-    CloudMechanikApiClient.prototype.getBaseAPIendPoint = function () {
+    CloudisenseApiClient.prototype.getBaseAPIendPoint = function () {
         return this._restEndPoint;
     };
     /**
@@ -523,7 +525,7 @@ var CloudMechanikApiClient = /** @class */ (function (_super) {
      * @param password
      * @returns
      */
-    CloudMechanikApiClient.prototype.authenticate = function (username, password) {
+    CloudisenseApiClient.prototype.authenticate = function (username, password) {
         var _this = this;
         return new Promise(function (resolve, reject) {
             var url = _this.getBaseAPIendPoint() + "/" + "authorize";
@@ -546,11 +548,11 @@ var CloudMechanikApiClient = /** @class */ (function (_super) {
             });
         });
     };
-    CloudMechanikApiClient.prototype.dispose = function () {
+    CloudisenseApiClient.prototype.dispose = function () {
         // TO DO cleanup
     };
-    CloudMechanikApiClient.MAX_ERROR_TOLERANCE = 5;
-    return CloudMechanikApiClient;
+    CloudisenseApiClient.MAX_ERROR_TOLERANCE = 5;
+    return CloudisenseApiClient;
 }(ClientEventProvider));
-export { CloudMechanikApiClient };
+export { CloudisenseApiClient };
 //# sourceMappingURL=client.js.map

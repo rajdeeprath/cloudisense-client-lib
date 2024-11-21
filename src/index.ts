@@ -1,5 +1,5 @@
 /*
-This file is part of `CloudMechanik` 
+This file is part of `Cloudisense` 
 Copyright 2018 Connessione Technologies
 
 This program is free software: you can redistribute it and/or modify
@@ -16,7 +16,7 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-export {CloudMechanikApiClient} from "./client"
+export {CloudisenseApiClient as CloudisenseApiClient} from "./client"
 export {OSStats, CPUStats, MemoryStats, DiskStats, NetworkStats, SystemStats, SimpleNotificationObject, SimpleDataNotificationObject, DataNotificationObject, IRPC, ISocketServiceObject, IClientChannel, IServiceClient, IServiceChannel, IServiceSocket, IClientConfig} from "./interfaces"
 export {RequestRecord, WSClient} from "./wsclient"
-export {ClientStateType, Stats, LogInfo, ErrorData, LogData, ScriptData, SimpleNotificationData, DatatNotificationData, ClientState, Credentials, TopicData, CloudMechanikServiceEvent, EventType, CloudMechanikClientEvent, CloudMechanikClientDataEvent, CloudMechanikClientNotificationEvent, CloudMechanikClientErrorEvent, CloudMechanikClientSimpleNotificationEvent, CloudMechanikClientDataNotificationEvent, CloudMechanikClientLogDataEvent, CloudMechanikClientScriptDataEvent, CloudMechanikClientStatsDataEvent} from "./models"
+export {ClientStateType, Stats, LogInfo, ErrorData, LogData, ScriptData, SimpleNotificationData, DatatNotificationData, ClientState, Credentials, TopicData, CloudisenseServiceEvent as CloudisenseServiceEvent, EventType, CloudisenseClientEvent as CloudisenseClientEvent, CloudisenseClientDataEvent as CloudisenseClientDataEvent, CloudisenseClientNotificationEvent as CloudisenseClientNotificationEvent, CloudisenseClientErrorEvent as CloudisenseClientErrorEvent, CloudisenseClientSimpleNotificationEvent as CloudisenseClientSimpleNotificationEvent, CloudisenseClientDataNotificationEvent as CloudisenseClientDataNotificationEvent, CloudisenseClientLogDataEvent as CloudisenseClientLogDataEvent, CloudisenseClientScriptDataEvent as CloudisenseClientScriptDataEvent, CloudisenseClientStatsDataEvent as CloudisenseClientStatsDataEvent} from "./models"

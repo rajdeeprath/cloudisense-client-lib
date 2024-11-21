@@ -3,7 +3,7 @@ import { IServiceClient, IClientConfig } from "./interfaces";
 import { IEventHandler } from "strongly-typed-events";
 import { ClientEventProvider } from "./event/eventprovider";
 import { LogInfo } from "./models";
-export declare class CloudMechanikApiClient extends ClientEventProvider implements IServiceClient {
+export declare class CloudisenseApiClient extends ClientEventProvider implements IServiceClient {
     host: string;
     port: number;
     autoconnect?: boolean;
