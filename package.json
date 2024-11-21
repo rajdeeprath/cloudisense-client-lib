@@ -19,7 +19,7 @@
     "debug": "tsc --sourcemap",
     "build_linux": "rm -rf ./dist && tsc --sourceMap false && tsc --build tsconfig.es5.json",
     "share_linux": "rm -rf ../cloudisense-client-react/src/dist  && cp -R ./dist ../cloudisense-client-react/src/dist",
-    "compile_win": "rmdir /q /S .\\dist && tsc --sourceMap false && tsc --build tsconfig.es5.json",
+    "build_win": "rmdir /q /S .\\dist && tsc --sourceMap false && tsc --build tsconfig.es5.json",
     "share_win": "xcopy .\\dist\\ ..\\cloudisense-client-react\\src\\dist\\ /E /Y"
   },
   "repository": {

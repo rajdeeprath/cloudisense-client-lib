@@ -158,7 +158,7 @@ const initializeSocketClient = (dispatch, data) => {
 1. Simple compile - Generate output files
 
 ```shell
-    tsc
+    npm run build
 ```
 
 
@@ -169,14 +169,14 @@ const initializeSocketClient = (dispatch, data) => {
 
 
 ```shell
-    rm -rf ./dist && tsc && tsc --build tsconfig.es5.json
+    npm run build_linux
 ```
 
 
 **Windows**
 
 ```shell
-    rmdir /q /S .\\dist && tsc && tsc --build tsconfig.es5.json
+    npm run build_win
 ```
 
 
@@ -186,13 +186,13 @@ const initializeSocketClient = (dispatch, data) => {
 
 
 ```shell
-    rm -rf ../cloudisense-client-react/src/dist  && cp -R ./dist ../cloudisense-client-react/src/dist
+    TO DO
 ```
 
 **Windows**
 
 
 ```shell
-    xcopy .\\dist\\ ..\\cloudisense-client-react\\src\\dist\\ /E /Y
+    TO DO
 ```
     
