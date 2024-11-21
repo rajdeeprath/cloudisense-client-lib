@@ -1,11 +1,11 @@
-# CloudMechanik API Library
+# cloudisense API Library
 
 ## ABOUT
 ---
 
-This library provides convenient access to the CloudMechanik backend service. It encapsulates communication mechanism for CloudMechanik's REST API as well as Real-time communication API.
+This library provides convenient access to the cloudisense backend service. It encapsulates communication mechanism for cloudisense's REST API as well as Real-time communication API.
 
-This library is for use with the CloudMechanik frontend React project.
+This library is for use with the cloudisense frontend React project.
 
 
 ## Usage
@@ -80,7 +80,7 @@ const initializeSocketClient = (dispatch, data) => {
 
     return new Promise(function (resolve, reject) {
 
-        const client = new CloudMechanikApiClient({
+        const client = new cloudisenseApiClient({
             host: "localhost",
             port: 8000,
             reconnectOnFailure: false,
@@ -186,13 +186,13 @@ const initializeSocketClient = (dispatch, data) => {
 
 
 ```shell
-    rm -rf ../cloudmechanik-client-react/src/dist  && cp -R ./dist ../cloudmechanik-client-react/src/dist
+    rm -rf ../cloudisense-client-react/src/dist  && cp -R ./dist ../cloudisense-client-react/src/dist
 ```
 
 **Windows**
 
 
 ```shell
-    xcopy .\\dist\\ ..\\cloudmechanik-client-react\\src\\dist\\ /E /Y
+    xcopy .\\dist\\ ..\\cloudisense-client-react\\src\\dist\\ /E /Y
 ```
     
