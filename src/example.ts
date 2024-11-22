@@ -22,7 +22,7 @@ import { ClientState, ClientStateType } from './models'
 const client = new CloudisenseApiClient({        
     host: "localhost",
     port: 8000,
-    reconnectOnFailure: false
+    reconnectOnFailure: false    
 });
 
 client.onClientStateUpdate.subscribe((stateObj:ClientState) => {
@@ -57,7 +57,7 @@ client.onClientStateUpdate.subscribe((stateObj:ClientState) => {
 
 });
 
-client.connect("administrator", "xyz123").then(()=>{
+client.connectWithCredentials("administrator", "xyz123").then(()=>{
      
     setTimeout(() => {
         client.subscribe_stats().then((data)=>{

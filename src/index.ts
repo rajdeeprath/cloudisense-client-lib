@@ -16,7 +16,9 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-export {CloudisenseApiClient as CloudisenseApiClient} from "./client"
-export {OSStats, CPUStats, MemoryStats, DiskStats, NetworkStats, SystemStats, SimpleNotificationObject, SimpleDataNotificationObject, DataNotificationObject, IRPC, ISocketServiceObject, IClientChannel, IServiceClient, IServiceChannel, IServiceSocket, IClientConfig} from "./interfaces"
+export {CloudisenseApiClient} from "./client"
+export type {OSStats, CPUStats, MemoryStats, DiskStats, NetworkStats, SystemStats, SimpleNotificationObject, SimpleDataNotificationObject, DataNotificationObject, IRPC, ISocketServiceObject, IClientChannel, IServiceClient, IServiceChannel, IServiceSocket, IClientConfig} from "./interfaces"
 export {RequestRecord, WSClient} from "./wsclient"
-export {ClientStateType, Stats, LogInfo, ErrorData, LogData, ScriptData, SimpleNotificationData, DatatNotificationData, ClientState, Credentials, TopicData, CloudisenseServiceEvent as CloudisenseServiceEvent, EventType, CloudisenseClientEvent as CloudisenseClientEvent, CloudisenseClientDataEvent as CloudisenseClientDataEvent, CloudisenseClientNotificationEvent as CloudisenseClientNotificationEvent, CloudisenseClientErrorEvent as CloudisenseClientErrorEvent, CloudisenseClientSimpleNotificationEvent as CloudisenseClientSimpleNotificationEvent, CloudisenseClientDataNotificationEvent as CloudisenseClientDataNotificationEvent, CloudisenseClientLogDataEvent as CloudisenseClientLogDataEvent, CloudisenseClientScriptDataEvent as CloudisenseClientScriptDataEvent, CloudisenseClientStatsDataEvent as CloudisenseClientStatsDataEvent} from "./models"
+export {AuthData, TokenInfo, ClientStateType, Stats, LogInfo, ErrorData, LogData, ScriptData, SimpleNotificationData, DatatNotificationData, ClientState, Credentials, TopicData, CloudisenseServiceEvent, EventType, CloudisenseClientEvent, CloudisenseClientDataEvent, CloudisenseClientNotificationEvent, CloudisenseClientErrorEvent, CloudisenseClientSimpleNotificationEvent, CloudisenseClientDataNotificationEvent, CloudisenseClientLogDataEvent, CloudisenseClientScriptDataEvent, CloudisenseClientStatsDataEvent} from "./models"
+export * from './event/events'
+export {NoticeType} from './enums'
