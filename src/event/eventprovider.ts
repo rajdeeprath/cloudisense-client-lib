@@ -18,7 +18,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 import { IClientChannel, IServiceChannel,IServiceClient} from "../interfaces";
 import { SignalDispatcher, SimpleEventDispatcher, EventDispatcher, ISimpleEvent } from "strongly-typed-events";
-import { CloudisenseClientDataNotificationEvent, CloudisenseClientSimpleNotificationEvent, SimpleNotificationData } from "../models";
+import { CloudisenseClientDataNotificationEvent, CloudisenseClientSimpleNotificationEvent, CloudisenseClientUIDataEvent, SimpleNotificationData } from "../models";
 
 
 export class ChannelEventProvider implements IServiceChannel {
@@ -47,6 +47,7 @@ export class ChannelEventProvider implements IServiceChannel {
 
 export class ClientEventProvider implements IClientChannel {
     /* Events */
+    _onUIEvent = new SimpleEventDispatcher<CloudisenseClientUIDataEvent>();
     _onTextNotificationEvent = new SimpleEventDispatcher<CloudisenseClientSimpleNotificationEvent>();
     _onTextDataNotificationEvent = new SimpleEventDispatcher<CloudisenseClientDataNotificationEvent>();
     _onDataEvent = new SimpleEventDispatcher<any>();
@@ -60,6 +61,10 @@ export class ClientEventProvider implements IClientChannel {
 
     public get onTextNotification() {
         return this._onTextNotificationEvent.asEvent();
+    }
+
+    public get onUIEvent() {
+        return this._onUIEvent.asEvent();
     }
     
     public get onTextDataNotification() {

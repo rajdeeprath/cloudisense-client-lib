@@ -5,6 +5,8 @@ export const TEXT_NOTIFICATION_EVENT = "text_notification";
 
 export const TEXT_DATA_NOTIFICATION_EVENT = "text_data_notification";
 
+export const EVENT_UI_UPDATE = "ui_update"
+
 export const DATA_EVENT = "data_generated";
 
 export const ERROR_EVENT = "error_generated";
@@ -17,6 +19,10 @@ export const TOPIC_LOG_ACTIONS = "/logging/actions"
 export const TOPIC_LOG_MONITORING = "/logging"
 
 export const TOPIC_STATS_MONITORING = "/stats"
+
+export const TOPIC_UI_UPDATES = "/ui/updates"
+
+export const TOPIC_UI_INITIALIZATION = "/ui/guide"
 
 export const TOPIC_PING = "/ping"
 
