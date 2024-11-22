@@ -16,20 +16,22 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-const WebSocketClient = require('websocket').client; // https://www.npmjs.com/package/websocket
-const Defer = require('defer-promise')
 import { nanoid } from 'nanoid'
 import { IServiceSocket, ISocketServiceObject } from "./interfaces";
 import { ChannelEventProvider} from "./event/eventprovider"
 import * as CHANNEL_STATES from './event/channelstates'
+const Deferred = require('promise-deferred');
+//var deferred = new Deferred();
 
+
+const REQUEST_DELAYED_TIME_MILLISECONDS = 10000
 
 
 export class RequestRecord{
-    defer:typeof Defer
+    defer:typeof Deferred
     timestamp:number
 
-    constructor (defer:typeof Defer, timestamp:number) {
+    constructor (defer:typeof Deferred, timestamp:number) {
         this.defer = defer
         this.timestamp = timestamp
     }
@@ -42,14 +44,15 @@ export class WSClient extends ChannelEventProvider implements IServiceSocket {
 
     host: string;
     port: number;  
-    authtoken: string;
+    authtoken:string;
     queryparams?: string | undefined;
+
+    private _connectTimeout: number = 5000;
 
     private _connected:boolean;
     private _wsEndPoint!: string;
 
-    private _client:typeof WebSocketClient;
-    private _connection:any
+    private _client!:WebSocket;
     private _disconnectFlag:boolean
 
     private _requests:Map<string,RequestRecord>
@@ -63,13 +66,12 @@ export class WSClient extends ChannelEventProvider implements IServiceSocket {
 
         this._connected = false
         this._disconnectFlag = false
-        this._client = undefined
         this._requests = new Map<string,RequestRecord>()
         
         this.host = config.host
         this.port = config.port
         this.authtoken = config.authtoken
-        this._wsEndPoint = "ws" + "://" + this.host + ":" + this.port + "/" + "ws?" + "token=" + this.authtoken;
+        this._wsEndPoint = "ws" + "://" + this.host + ":" + this.port + "/" + "ws" +  "?" + "token=" + this.authtoken;
 
         /* Auto cleanup */
         this._cleanupId = setInterval(() => this.cleanup_requests(), 30000);
@@ -81,124 +83,199 @@ export class WSClient extends ChannelEventProvider implements IServiceSocket {
      } 
 
 
+    /**
+     * Returns host IP/address of the socket endpoint 
+     * @returns IP/hostname
+     */
     public getHost():string{
         return this.host;
     }
 
 
+    /**
+     * Returns port number for websocket client
+     * @returns port number
+     */
     public getPort():number{
         return this.port;
     }
 
 
-    public connect():Promise<any>{
+    /**
+     * Connects websocket service to backend
+     * 
+     * @returns Promise which is resolved when connection is successful else rejected
+     * 
+     */
+    public connectService():Promise<any>{
 
         return new Promise((resolve,reject) => {
 
-            if(this._client == undefined)
+            let resolved = false
+            
+            if(!this.is_connected())
             {
+                if(this._client === undefined){
+                    this._client = new WebSocket(this._wsEndPoint);
+                }
 
-                this._connection = undefined
-                this._client = new WebSocketClient();
 
-                
-                this._client.on('connectFailed', (error:any) => {
-                    this._connected = false
-                    console.log('Connect Error: ' + error.toString()); 
+                /**
+                 * Handle socket error
+                 */
+                this._client.onerror = (error:any)=>{
+                    this._connected = false                    
                     this._onChannelState.dispatch(CHANNEL_STATES.STATE_CHANNEL_ERROR);                   
-                    reject(error)
-                });
+                    console.error('Socket Error: ' + error.toString()); 
+
+                    if(!resolved){                
+                        reject(error) 
+                        resolved = true
+                    }                   
+                };
+
                 
-
-                this._client.on('connect', (connection:any) => {
-
-                    console.info('WebSocket Client Connected');
+                /**
+                 * Handle socket connect
+                 */
+                this._client.onopen = (e:any)=>{
                     this._onChannelState.dispatch(CHANNEL_STATES.STATE_CHANNEL_CONNECTED);
-
                     this._connected = true
-                    this._connection = connection
 
-                    connection.on('error', (error:any) => {
-                        this._connected = false
-                        console.error("Connection Error: " + error.toString());
-                        this._onChannelState.dispatch(CHANNEL_STATES.STATE_CHANNEL_ERROR);
-                    });
+                    if(!resolved){
+                        resolve(this)
+                        resolved = true
+                    } 
+                };
 
-                    connection.on('close', () => {
-                        this._connected = false
-                        console.debug('protocol Connection Closed');
-                        if(this._disconnectFlag){
-                            this._onChannelState.dispatch(CHANNEL_STATES.STATE_CHANNEL_DISCONNECTED);
-                        }else{
-                            this._onChannelState.dispatch(CHANNEL_STATES.STATE_CHANNEL_CONNECTION_LOST);
-                        }
-                    });                    
+                
+                /**
+                 * Handle socket close
+                 */
+                this._client.onclose = (event) => {                    
+                    this._connected = false
+                    if(this._disconnectFlag && event.wasClean){
+                        this._onChannelState.dispatch(CHANNEL_STATES.STATE_CHANNEL_DISCONNECTED);
+                    }else{
+                        this._onChannelState.dispatch(CHANNEL_STATES.STATE_CHANNEL_CONNECTION_LOST);
+                    }
+                };
 
-                    connection.on('message', (message:any) => {
-                        if (message.type === 'utf8') {
-                            console.debug("Received: '" + message.utf8Data + "'");
 
-                            try 
+
+                /**
+                 * Handle socket message
+                 */
+                this._client.onmessage = (event) => {                    
+                    
+                    if(typeof event.data === "string")
+                    {
+                        const message = event.data;
+                        console.debug("Received: '" + message + "'");
+                        try 
+                        {
+                            let data = JSON.parse(message);
+                            if(data.hasOwnProperty('type') && data["type"] == "rpc")
                             {
-                                let data = JSON.parse(message.utf8Data);
-                                if(data.hasOwnProperty('type') && data["type"] == "rpc")
-                                {
-                                    this.resolve_request(data)
-                                }
-                                else
-                                {
-                                    this._onChannelData.dispatch(data)
-                                    this._onChannelState.dispatch(CHANNEL_STATES.STATE_CHANNEL_DATA);
-                                }                               
-                                
-                            } 
-                            catch (e) 
+                                this.resolve_request(data)
+                            }
+                            else
                             {
-                                console.error("Unexpected message type (not JSON) : " + String(e))
-                            }                            
+                                this._onChannelData.dispatch(data)
+                                this._onChannelState.dispatch(CHANNEL_STATES.STATE_CHANNEL_DATA);
+                            }
                         }
-                        
-                    });
+                        catch (e) 
+                        {
+                            throw new TypeError("Unexpected message type (not JSON) : " + String(e));
+                        }
+                    }
+                    else if(event.data instanceof Blob)
+                    {
+                        throw new TypeError("Invalid message type [Blob]");
+                    }
+                    else if(event.data instanceof ArrayBuffer)
+                    {
+                        throw new TypeError("Invalid message type [ArrayBuffer]");
+                    }                    
+                };
 
-                    resolve(this)
-                });
+                setTimeout(()=>{
+                    if(!resolved){                
+                        reject("Connect timeout") 
+                        resolved = true
+                    }
+
+                }, this._connectTimeout);
+                               
             }
-
-
-            if (!this._connected || this._client.Closed){
-                this._onChannelState.dispatch(CHANNEL_STATES.STATE_CHANNEL_CONNECTIING);
-                this._client.connect(this._wsEndPoint);
-            }else{
-                console.error("socket is already connected");
-            }
-        });        
+        });
     }
 
 
-    public disconnect():void{
-        if (this._connected){
+    
+    /**
+     * Disconnects websocket on demand and cleans the websocket object + handlers
+     */
+    public disconnectService():void{
+        if (this.is_connected()){
             // use flag to see if disconnect was requested or automatic
             this._disconnectFlag = true
             setTimeout(() => {
                 this._disconnectFlag = false
-            }, 5000);
+            }, 3000);
 
-            this._client.close()
+            try{
+                this._client.close()                
+            }catch(error){
+                throw error
+            }finally{
+                this._clear_handlers()                
+            }
+            
         }else{
-            console.error("socket is not connected");
+            throw new Error("socket is not connected");
         }
     }
 
 
+    /**
+     * Clears up websocket callback handlers
+     */
+    private _clear_handlers():void{
+
+        if(this._client != null && this._client != undefined){
+            
+            this._client.onmessage = null
+            this._client.onopen = null
+            this._client.onerror = null
+            this._client.onclose = null
+        }
+    }
+    
+
+
+    /**
+     * Checks to see whether socket is conencted or not.
+     * @returns true is socket is conencted, false otherwise
+     */
     public is_connected():boolean{
-        if(this._connection == undefined){
+        if(this._connected === undefined){
             return false;
         }else{
-            return this._connection.connected;
+            return this._connected;
         }
     }
 
 
+    /**
+     * Builds JSON request format for RPC with Cloudisense backend
+     * 
+     * @param requestid 
+     * @param intent 
+     * @param params 
+     * @returns 
+     */
     private buildRequest(requestid:string, intent:string, params:object)
     {
         return {
@@ -211,7 +288,7 @@ export class WSClient extends ChannelEventProvider implements IServiceSocket {
 
 
     /**
-     * Makes RPC request to server
+     * Makes RPC request to server with an intent and parameter map
      * `
      * @param methodName 
      * @param params 
@@ -224,39 +301,44 @@ export class WSClient extends ChannelEventProvider implements IServiceSocket {
         
         let requestid = nanoid();
         let request = this.buildRequest(requestid, intent, params)
-        let deferred = new Defer()
+        let deferred = new Deferred();
+        let record = new RequestRecord(deferred, new Date().getUTCMilliseconds())
 
-        if (this._connection != undefined && this._connection.connected) {                                
+        if (this.is_connected()) {                                
                 
             try{
                 setTimeout(() => {
-                    this._connection.sendUTF(JSON.stringify(request));    
+                    this._client.send(JSON.stringify(request))
                 }, 10);                    
             }catch(err){
                 console.error("Unable to send request")
             }
         }else{
-            console.log("Socket is not connected")
+            console.error("Socket is not connected")
         };
 
-        this._requests.set(requestid, new RequestRecord(deferred, new Date().getUTCMilliseconds()))        
+        this._requests.set(requestid, record)        
         return deferred.promise;
     }
 
 
 
-
+    /**
+     * Cleans up old/delayed requests from the requests queue
+     * by looking up request timestamp. Requests are thereby rejected
+     * with a timeout error.
+     */
     private cleanup_requests():void
     {
         const now = new Date().getUTCMilliseconds()
         this._requests.forEach((value,requestid,map)=>{
             const record:RequestRecord  =  (value as RequestRecord)
             const request_timestamp = record.timestamp
-            if(now - request_timestamp > 10000)
+            if(now - request_timestamp > REQUEST_DELAYED_TIME_MILLISECONDS)
             {
                 try
                 {
-                    const defer:typeof Defer =  record.defer
+                    const defer:typeof Deferred =  record.defer
                     defer.reject("RPC Timed out")
                 }
                 catch(e)
@@ -273,14 +355,18 @@ export class WSClient extends ChannelEventProvider implements IServiceSocket {
     }
 
 
-
+    /**
+     * Determined whether a RPC was successful or not and accordingly
+     * resolves or rejects the client promise
+     * @param response 
+     */
     private resolve_request(response:any):void
     {
         let requestid = response["requestid"]
 
         try{            
             let response_timestamp =  response["timestamp"]
-            let def:typeof Defer = this._requests.get(requestid)?.defer
+            let def:typeof Deferred = this._requests.get(requestid)?.defer
 
             if(response["status"] == "success")
             {

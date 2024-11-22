@@ -31,6 +31,19 @@ export enum ClientStateType {
 }
 
 
+export class TokenInfo {
+    token!:string;
+    issued!: number;
+    expires!: number;
+}
+
+
+export class AuthData {
+    refresh!:TokenInfo;
+    access!: TokenInfo;
+}
+
+
 export class OSStats {
 
     arch!: string;
@@ -51,20 +64,17 @@ export class OSStats {
 
     timezone!: string;
 
+    average_load!: string;
 }
 
 
 export class CPUStats {
 
-    frequency!: string;
+    max_frequency!: number;
 
     count!: number;
 
-    vendor!: string;
-
-    model!: string;
-
-    percent!: string;
+    percent!: number;
 }
 
 
@@ -124,6 +134,10 @@ export class NetworkStats {
     dropin!: number;
 
     dropout!: number;
+
+    bytes_recv_rate!: number;
+    
+    bytes_sent_rate!: number;
 }
 
 
@@ -165,6 +179,24 @@ export class LogInfo {
     constructor(name: string, topic: string) {
         this.name = name
         this.topic = topic
+    }
+}
+
+
+
+export class RuleInfo {
+    id?: string;
+    description?: string;
+    enabled?: boolean;
+    subject?:string;
+    trigger?:string;
+
+    constructor(id: string, description: string, subject:string, enabled: boolean, trigger:string) {
+        this.id = id
+        this.description = description
+        this.subject = subject
+        this.trigger = trigger
+        this.enabled = enabled
     }
 }
 
@@ -243,7 +275,6 @@ export class CloudisenseServiceEvent{
     state!:string
     data!:any
     meta!: any
-    note!:string
     timestamp!:number
 
     constructor(name:string){
@@ -253,7 +284,10 @@ export class CloudisenseServiceEvent{
 }
 
 export enum EventType {
+    UI = "UI",
+    SCRIPT_EXECUTION = "SCRIPT_EXECUTION",
     NOTIFICATION = "NOTIFICATION",
+    DATANOTIFICATION = "DATANOTIFICATION",
     DATA = "DATA",
     ERROR = "ERROR"
 }
@@ -262,10 +296,9 @@ export abstract class CloudisenseClientEvent{
     topic!:string
     data:any
     meta!: any
-    note!:string
     timestamp!:number
 
-    public constructor(topic:string, data:any, meta:any, note:string, timestamp:number){
+    public constructor(topic:string, data:any, meta:any,  timestamp:number){
 
         if (topic!==undefined){
             this.topic = topic
@@ -278,10 +311,6 @@ export abstract class CloudisenseClientEvent{
         if (meta!==undefined){
             this.meta = meta
         }
-
-        if (note!==undefined){
-            this.note = note
-        }
         
         if (timestamp!==undefined || !isNaN(timestamp)){
             this.timestamp = timestamp
@@ -292,56 +321,67 @@ export abstract class CloudisenseClientEvent{
 
 export abstract class CloudisenseClientDataEvent extends CloudisenseClientEvent{
     type:EventType = EventType.DATA
-    constructor(topic:string, data:any, meta:any, note:string, timestamp:number){
-        super(topic, data, meta, note, timestamp)
+    constructor(topic:string, data:any, meta:any,  timestamp:number){
+        super(topic, data, meta,  timestamp)
     }
 }
 
 export abstract class CloudisenseClientNotificationEvent extends CloudisenseClientEvent{
     type:EventType = EventType.NOTIFICATION
-    constructor(topic:string, data:any, meta:any, note:string, timestamp:number){
-        super(topic, data, meta, note, timestamp)
+    constructor(topic:string, data:any, meta:any,  timestamp:number){
+        super(topic, data, meta,  timestamp)
     }
 }
 
 
 export class CloudisenseClientErrorEvent extends CloudisenseClientEvent{
     type:EventType = EventType.ERROR
-    constructor(topic:string, data:any, meta:any, note:string, timestamp:number){
-        super(topic, plainToClass(ErrorData, data), meta, note, timestamp)        
+    constructor(topic:string, data:any, meta:any,  timestamp:number){
+        super(topic, plainToClass(ErrorData, data), meta,  timestamp)        
     }
 }
 
 
 export class CloudisenseClientSimpleNotificationEvent extends CloudisenseClientNotificationEvent{
-    constructor(topic:string, data:any, meta:any, note:string, timestamp:number){
-        super(topic, plainToClass(SimpleNotificationData, data), meta, note, timestamp)        
+    constructor(topic:string, data:any, meta:any,  timestamp:number){
+        super(topic, plainToClass(SimpleNotificationData, data), meta,  timestamp)        
     }    
 }
 
 export class CloudisenseClientDataNotificationEvent extends CloudisenseClientNotificationEvent{
-    constructor(topic:string, data:any, meta:any, note:string, timestamp:number){
-        super(topic, plainToClass(DatatNotificationData, data), meta, note, timestamp)        
+    constructor(topic:string, data:any, meta:any,  timestamp:number){
+        super(topic, plainToClass(DatatNotificationData, data), meta,  timestamp)        
     }    
 }
 
 export class CloudisenseClientLogDataEvent extends CloudisenseClientDataEvent{
-    constructor(topic:string, data:any, meta:any, note:string, timestamp:number){
-        super(topic, plainToClass(ScriptData, data), meta, note, timestamp)
+    constructor(topic:string, data:any, meta:any,  timestamp:number){
+        super(topic, plainToClass(ScriptData, data), meta,  timestamp)
     }  
 }
 
 
 export class CloudisenseClientScriptDataEvent extends CloudisenseClientDataEvent{
-    constructor(topic:string, data:any, meta:any, note:string, timestamp:number){
-        super(topic, plainToClass(ScriptData, data), meta, note, timestamp)
+    constructor(topic:string, data:any, meta:any,  timestamp:number){
+        super(topic, plainToClass(ScriptData, data), meta,  timestamp)
     } 
 }
 
 
 export class CloudisenseClientStatsDataEvent extends CloudisenseClientDataEvent{
-    constructor(topic:string, data:any, meta:any, note:string, timestamp:number){
-        super(topic, plainToClass(Stats, data), meta, note, timestamp)
+    constructor(topic:string, data:any, meta:any,  timestamp:number){
+        super(topic, plainToClass(Stats, data), meta,  timestamp)
+    } 
+    
+}
+
+
+
+
+export class CloudisenseClientUIDataEvent extends CloudisenseClientDataEvent{
+    type:EventType = EventType.UI
+    constructor(topic:string, data:any, meta:any,  timestamp:number){
+        super(topic, data, meta,  timestamp)
     } 
     
 }
