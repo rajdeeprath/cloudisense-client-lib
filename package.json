@@ -1,11 +1,11 @@
 {
-  "name": "cloudisense-api-library",
+  "name": "cloudisense-client-lib",
   "version": "0.0.1",
-  "description": "Api bridge for cloudisense client & service",
+  "description": "Api library for cloudisense react client",
   "main": "lib/index.js",
   "module": "dist/index.esm.js",
   "types": "lib/index.d.ts",
-  "author": "Connessione Technologies connessionetechnologies@gmail.com",
+  "author": "Rajdeep Rath",
   "license": "Apache 2.0",
   "files": [
     "/lib"
@@ -24,13 +24,13 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/connessionetech/cloudisense-client-lib.git"
+    "url": "https://github.com/connessionetech/cloudisense-client-lib.git"
   },
-  "keywords": [],
+  "keywords": ["cloudisense", "automation", "devops", "monitoring"],
   "bugs": {
-    "url": "https://github.com/connessionetech/cloudisense-api-connector/issues"
+    "url": "https://github.com/connessionetech/cloudisense-client-lib/issues"
   },
-  "homepage": "https://github.com/connessionetech/cloudisense-api-connector#readme",
+  "homepage": "https://github.com/connessionetech/cloudisense-client-lib#readme",
   "devDependencies": {
     "@types/node": "^7.0.71",
     "class-transformer": "^0.5.1",
