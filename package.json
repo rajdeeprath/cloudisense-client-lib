@@ -1,5 +1,5 @@
 {
-  "name": "cloudisense-client-lib",
+  "name": "cdsclient-lib",
   "version": "0.0.1",
   "description": "Api library for cloudisense react client",
   "main": "lib/index.js",
