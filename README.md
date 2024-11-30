@@ -1,17 +1,15 @@
 # Cloudisense API Library
 
-## ABOUT
+## About
+This library provides a convenient way to access the Cloudisense backend services. It encapsulates communication mechanisms for Cloudisense's REST API and Real-time Communication API.
+
+This library is intended for use with the Cloudisense frontend React project.
+
 ---
-
-This library provides convenient access to the cloudisense backend service. It encapsulates communication mechanism for cloudisense's REST API as well as Real-time communication API.
-
-This library is for use with the cloudisense frontend React project.
-
 
 ## Usage
----
 
-The following code snippet from the react-redux project demonstrates how connection is established to service from client.
+The following code snippet from a React-Redux project demonstrates how to establish a connection to the service from a client.
 
 ### Main Authentication Function
 
@@ -181,6 +179,8 @@ const initializeSocketClient = (dispatch, data) => {
 
 
 3. Distribute compiled files for linux to react client project
+
+> When building alongside `Cloudisense` main project folder
 
 **Linux**
 
