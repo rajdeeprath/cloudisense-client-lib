@@ -196,3 +196,6 @@ const initializeSocketClient = (dispatch, data) => {
     TO DO
 ```
     
+4. NPM 
+
+The library is hosted on NPM @ https://github.com/rajdeeprath/cloudisense-client-lib
