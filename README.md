@@ -198,4 +198,4 @@ const initializeSocketClient = (dispatch, data) => {
     
 4. NPM 
 
-The library is hosted on NPM @ https://github.com/rajdeeprath/cloudisense-client-lib
+The library is hosted on NPM @ [https://www.npmjs.com/package/cdsclient-lib](https://www.npmjs.com/package/cdsclient-lib)
