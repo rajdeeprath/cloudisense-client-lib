@@ -1,6 +1,6 @@
 {
   "name": "cdsclient-lib",
-  "version": "0.0.2",
+  "version": "0.0.3",
   "description": "Api library for cloudisense react client",
   "main": "lib/index.js",
   "module": "dist/index.esm.js",
@@ -14,6 +14,7 @@
     "build:es6": "tsc --project tsconfig.es6.json",
     "build:cjs": "tsc --project tsconfig.commonjs.json",
     "build": "npm run build:es6 && npm run build:cjs",
+    "pack:output": "npm pack --pack-destination build",
     "format": "prettier --write \"src/**/*.ts\" \"src/**/*.js\"",
     "lint": "tslint -p tsconfig.json",
     "prod": "tsc --sourceMap false && node ./lib/index.js",
