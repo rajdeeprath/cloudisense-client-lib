@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright © 2024 Rajdeep Rath. All Rights Reserved.
  *
  * This codebase is open-source and provided for use exclusively with the Cloudisense platform,
@@ -15,6 +15,7 @@
  *
  * For questions or permissions beyond the scope of this notice, please contact Rajdeep Rath.
  */
+
 
 export {CloudisenseApiClient} from "./client"
 export type {OSStats, CPUStats, MemoryStats, DiskStats, NetworkStats, SystemStats, SimpleNotificationObject, SimpleDataNotificationObject, DataNotificationObject, IRPC, ISocketServiceObject, IClientChannel, IServiceClient, IServiceChannel, IServiceSocket, IClientConfig} from "./interfaces"

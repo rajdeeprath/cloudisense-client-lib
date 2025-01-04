@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright © 2024 Rajdeep Rath. All Rights Reserved.
  *
  * This codebase is open-source and provided for use exclusively with the Cloudisense platform,
@@ -16,6 +16,7 @@
  * For questions or permissions beyond the scope of this notice, please contact Rajdeep Rath.
  */
 
+
 import 'reflect-metadata';
 import { IServiceClient, IServiceSocket, IClientConfig } from "./interfaces";
 import { WSClient} from "./wsclient";
@@ -29,7 +30,6 @@ import * as CHANNEL_STATES from './event/channelstates'
 import * as EVENTS from './event/events'
 import axios from 'axios';
 import { plainToInstance } from 'class-transformer';
-
 
 
 export class CloudisenseApiClient extends ClientEventProvider implements IServiceClient {

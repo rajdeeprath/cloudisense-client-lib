@@ -1,6 +1,6 @@
 {
   "name": "cdsclient-lib",
-  "version": "0.0.2",
+  "version": "0.0.3",
   "description": "Api library for cloudisense react client",
   "main": "lib/index.js",
   "module": "dist/index.esm.js",
@@ -11,8 +11,10 @@
     "/lib"
   ],
   "scripts": {
-    "build": "tsc",
-    "tsc": "tsc",
+    "build:es6": "tsc --project tsconfig.es6.json",
+    "build:cjs": "tsc --project tsconfig.commonjs.json",
+    "build": "npm run build:es6 && npm run build:cjs",
+    "pack:output": "npm pack --pack-destination build",
     "format": "prettier --write \"src/**/*.ts\" \"src/**/*.js\"",
     "lint": "tslint -p tsconfig.json",
     "prod": "tsc --sourceMap false && node ./lib/index.js",
@@ -26,7 +28,12 @@
     "type": "git",
     "url": "https://github.com/rajdeeprath/cloudisense-client-lib.git"
   },
-  "keywords": ["cloudisense", "automation", "devops", "monitoring"],
+  "keywords": [
+    "cloudisense",
+    "automation",
+    "devops",
+    "monitoring"
+  ],
   "bugs": {
     "url": "https://github.com/rajdeeprath/cloudisense-client-lib/issues"
   },
@@ -39,10 +46,10 @@
     "tsconfig-paths": "^3.9.0",
     "tslint": "^6.1.3",
     "tslint-config-prettier": "^1.18.0",
-    "typescript": "^3.9.10"
+    "typescript": "^5.7.2"
   },
   "dependencies": {
-    "axios": "^0.21.1",
+    "axios": "^1.7.9",
     "defer-promise": "^2.0.1",
     "js-base64": "^3.6.1",
     "js-sha256": "^0.9.0",
