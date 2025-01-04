@@ -161,6 +161,8 @@ const initializeSocketClient = (dispatch, data) => {
 
 This will build outputs for es6 & commonjs in the `dist/lib` directory.
 
+</br>
+
 2. Create package for installing locally
 
 **Linux**
@@ -181,15 +183,17 @@ npm install /path-to/build/cdsclient-lib-0.0.2.tgz
 
 TO DO
 
+</br>
 
 3. Distribute the library on `npm`
 
-> When building alongside `Cloudisense` main project folder
+The final step is to publish this on `npm`, so that it can be installed directly from there.
 
 * **Login:**: Type `npm login` at the console to initiate login. This will open a browser window, where you can authenticate on `npm`.
 
 * **Publish:**: Type `npm publish` to publish this library on `npm`. Make sure the version is above the one existing on `npm`
 
+</br>
     
 4. NPM 
 
