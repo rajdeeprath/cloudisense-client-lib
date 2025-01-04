@@ -155,46 +155,41 @@ const initializeSocketClient = (dispatch, data) => {
 
 1. Simple compile - Generate output files
 
-```shell
+```bash
     npm run build
 ```
 
+This will build outputs for es6 & commonjs in the `dist/lib` directory.
 
-
-2. Compile (Platform specific)
+2. Create package for installing locally
 
 **Linux**
 
 
-```shell
-    npm run build_linux
+```bash
+    npm run pack:output
+```
+
+This will create a `tgz` file in the build folder. This file can be used to install the dependency locally.
+
+```bash
+npm install /path-to/build/cdsclient-lib-0.0.2.tgz
 ```
 
 
 **Windows**
 
-```shell
-    npm run build_win
-```
+TO DO
 
 
-3. Distribute compiled files for linux to react client project
+3. Distribute the library on `npm`
 
 > When building alongside `Cloudisense` main project folder
 
-**Linux**
+* **Login:**: Type `npm login` at the console to initiate login. This will open a browser window, where you can authenticate on `npm`.
 
+* **Publish:**: Type `npm publish` to publish this library on `npm`. Make sure the version is above the one existing on `npm`
 
-```shell
-    TO DO
-```
-
-**Windows**
-
-
-```shell
-    TO DO
-```
     
 4. NPM 
 
