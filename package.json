@@ -1,14 +1,20 @@
 {
   "name": "cdsclient-lib",
-  "version": "0.0.3",
+  "version": "0.0.4",
   "description": "Api library for cloudisense react client",
-  "main": "lib/index.js",
-  "module": "dist/index.esm.js",
-  "types": "lib/index.d.ts",
+  "main": "./dist/lib/cjs/index.js",
+  "module": "./dist/lib/es6/index.js",
+  "types": "./dist/lib/es6/index.d.ts",
   "author": "Rajdeep Rath",
   "license": "Apache 2.0",
+  "exports": {
+    ".": {
+      "require": "./dist/lib/cjs/index.js",
+      "import": "./dist/lib/es6/index.js"
+    }
+  },
   "files": [
-    "/lib"
+    "dist/lib"
   ],
   "scripts": {
     "build:es6": "tsc --project tsconfig.es6.json",
@@ -39,7 +45,7 @@
   },
   "homepage": "https://github.com/rajdeeprath/cloudisense-client-lib#readme",
   "devDependencies": {
-    "@types/node": "^7.0.71",
+    "@types/node": "^22.10.5",
     "class-transformer": "^0.5.1",
     "prettier": "^2.2.1",
     "ts-node": "^10.0.0",
@@ -51,12 +57,13 @@
   "dependencies": {
     "axios": "^1.7.9",
     "defer-promise": "^2.0.1",
-    "js-base64": "^3.6.1",
+    "js-base64": "^3.7.7",
     "js-sha256": "^0.9.0",
     "json2typescript": "^1.4.1",
-    "nanoid": "^3.1.23",
+    "nanoid": "^3.3.8",
+    "promise-deferred": "^2.0.4",
     "reflect-metadata": "^0.1.13",
-    "strongly-typed-events": "^2.1.7",
+    "strongly-typed-events": "^2.1.16",
     "tsify": "^5.0.2",
     "websocket": "^1.0.34"
   }
