@@ -176,7 +176,7 @@ export class WSClient extends ChannelEventProvider implements IServiceSocket {
                         try 
                         {
                             let data = JSON.parse(message);
-                            if(data.hasOwnProperty('type') && data["type"] == "rpc")
+                            if(data.hasOwnProperty('type') && (data["type"] == "rpc" || data["type"] == "rpc_response"))
                             {
                                 this.resolve_request(data)
                             }
