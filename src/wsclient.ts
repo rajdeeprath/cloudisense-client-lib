@@ -167,40 +167,37 @@ export class WSClient extends ChannelEventProvider implements IServiceSocket {
                 /**
                  * Handle socket message
                  */
-                this._client.onmessage = (event) => {                    
-                    
-                    if(typeof event.data === "string")
-                    {
-                        const message = event.data;
-                        console.debug("Received: '" + message + "'");
-                        try 
-                        {
-                            let data = JSON.parse(message);
-                            if(data.hasOwnProperty('type') && (data["type"] == "rpc" || data["type"] == "rpc_response"))
-                            {
-                                this.resolve_request(data)
+                this._client.onmessage = (event) => {
+                    console.debug("Received: ", event.data);
+                
+                    if (typeof event.data === "string") {
+                        try {
+                            let data = JSON.parse(event.data);
+                
+                            if (Array.isArray(data)) {
+                                // Received a batch of events
+                                for (let message of data) {
+                                    this._onChannelData.dispatch(message);
+                                    this._onChannelState.dispatch(CHANNEL_STATES.STATE_CHANNEL_DATA);
+                                }
                             }
-                            else
-                            {
-                                this._onChannelData.dispatch(data)
+                            else if (data.hasOwnProperty('type') && (data["type"] === "rpc" || data["type"] === "rpc_response")) {
+                                this.resolve_request(data);
+                            }
+                            else {
+                                this._onChannelData.dispatch(data);
                                 this._onChannelState.dispatch(CHANNEL_STATES.STATE_CHANNEL_DATA);
                             }
-                        }
-                        catch (e) 
-                        {
-                            throw new TypeError("Unexpected message type (not JSON) : " + String(e));
+                        } catch (e) {
+                            console.error("Error parsing JSON from WebSocket:", e);
                         }
                     }
-                    else if(event.data instanceof Blob)
-                    {
-                        throw new TypeError("Invalid message type [Blob]");
+                    else {
+                        console.error("Unexpected WebSocket data type:", typeof event.data);
                     }
-                    else if(event.data instanceof ArrayBuffer)
-                    {
-                        throw new TypeError("Invalid message type [ArrayBuffer]");
-                    }                    
                 };
 
+                
                 setTimeout(()=>{
                     if(!resolved){                
                         reject("Connect timeout") 
