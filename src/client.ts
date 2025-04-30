@@ -911,9 +911,31 @@ export class CloudisenseApiClient extends ClientEventProvider implements IServic
 
 
 
+    /**
+     * Sends an introduction request to the smart assist service.
+     * 
+     * This function triggers the assistant to introduce itself or provide 
+     * an initial greeting via RPC. Typically used at the start of a session.
+     * 
+     * @returns Promise that resolves with the assistant's introductory message.
+     */
+    public smart_assist_introduce(): Promise<any>
+    {
+        return new Promise((resolve, reject) => {
+
+            let promise: Promise<any> = this._socketservice.doRPC("assist_introduction", {});
+            promise.then((data: any) => {
+                resolve(data);
+            }).catch((err) => {
+                reject(err);
+            });
+
+        });
+    }
 
 
-    
+
+
     /**
      * Connects to backend service using auth data from previous authentication
      * 
