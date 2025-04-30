@@ -863,6 +863,56 @@ export class CloudisenseApiClient extends ClientEventProvider implements IServic
 
 
 
+
+    /**
+     * Sends a query string to the smart assist system via RPC.
+     * 
+     * @param query - The input query to be processed by smart assist.
+     * @returns Promise that resolves with the response data from the smart assist system.
+     */
+    public query_smart_assist(query: string): Promise<any>
+    {
+        return new Promise((resolve, reject) => {
+
+            let promise: Promise<any> = this._socketservice.doRPC("query_assist", { "query": query });
+            promise.then((data: any) => {
+                resolve(data);
+            }).catch((err) => {
+                reject(err);
+            });
+
+        });
+    }
+
+
+
+
+
+    /**
+     * Resets or clears the current smart assist session on the server.
+     * 
+     * @param query - (Unused) Reserved for future input parameters.
+     * @returns Promise that resolves with the result of the session reset operation.
+     */
+    public reset_smart_assist_session(query: string): Promise<any>
+    {
+        return new Promise((resolve, reject) => {
+
+            let promise: Promise<any> = this._socketservice.doRPC("clear_assist_session", {});
+            promise.then((data: any) => {
+                resolve(data);
+            }).catch((err) => {
+                reject(err);
+            });
+
+        });
+    }
+
+
+
+
+
+
     
     /**
      * Connects to backend service using auth data from previous authentication
