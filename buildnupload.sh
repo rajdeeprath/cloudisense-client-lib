@@ -1,57 +1,89 @@
 #!/bin/bash
 
-# Set the target repository (default: npm registry)
-NPM_REGISTRY="https://registry.npmjs.org/"
+# ----Tag to trigger----
+# git tag -a v1.3.0 -m "Release v1.3.0"
+# git push origin v1.3.0
 
-# Extract the version from package.json
+# Run Locally
+# To run this script from your terminal (outside GitHub Actions):
+# export NODE_AUTH_TOKEN=npm_xxxxxxxxxxxxxxxxxxxxxxxxx
+# ./buildnupload.sh
+# OR
+# NODE_AUTH_TOKEN=npm_xxxxxxxxxxxxxxxxxxxxxxxxx ./buildnupload.sh
+
+
+
+# Exit immediately if a command fails or any part of a pipeline fails
+set -e
+set -o pipefail
+
+# ============================
+# CONFIGURATION
+# ============================
+
+# Set the npm registry — override with env var if needed
+# Example override: NPM_REGISTRY=https://registry.npmjs.org ./buildnupload.sh
+NPM_REGISTRY="${NPM_REGISTRY:-https://registry.npmjs.org/}"
+
 PACKAGE_JSON="package.json"
-VERSION=$(jq -r '.version' "$PACKAGE_JSON")
+BUILD_DIR="dist"
 
-# Ensure jq is installed
-if [ -z "$VERSION" ] || [ "$VERSION" == "null" ]; then
-  echo "❌ Error: Could not extract version from package.json."
+# ============================
+# PRECHECKS
+# ============================
+
+# Ensure `jq` is installed (used to extract version from package.json)
+if ! command -v jq &> /dev/null; then
+  echo "❌ ERROR: 'jq' is required but not installed. Please install jq."
   exit 1
 fi
 
-echo "📦 Preparing to publish version $VERSION of cloudisense client-lib..."
+# Extract version from package.json
+VERSION=$(jq -r '.version' "$PACKAGE_JSON")
+if [ -z "$VERSION" ] || [ "$VERSION" == "null" ]; then
+  echo "❌ ERROR: Could not extract version from $PACKAGE_JSON."
+  exit 1
+fi
 
-# Remove old build artifacts
-echo "🧹 Cleaning old build files..."
-rm -rf ./dist
-rm -rf ./node_modules
+echo "📦 Preparing to publish version $VERSION of cloudisense-client-lib..."
 
-# Install dependencies
+# ============================
+# CLEANUP
+# ============================
+
+echo "🧹 Cleaning previous builds..."
+rm -rf "$BUILD_DIR" node_modules
+
+# ============================
+# INSTALL & BUILD
+# ============================
+
 echo "📥 Installing dependencies..."
 npm install --legacy-peer-deps
 
-# Build the TypeScript project
-echo "⚙️ Building TypeScript project..."
+echo "🛠️ Building TypeScript project..."
 npm run build
 
-# Verify the build output exists
-BUILD_DIR="dist"
+# Ensure the build output exists
 if [ ! -d "$BUILD_DIR" ]; then
-  echo "❌ Error: Build failed. '$BUILD_DIR' directory does not exist."
+  echo "❌ ERROR: Build failed. '$BUILD_DIR' directory not found."
   exit 1
 fi
 
-# Run npm package verification
-echo "🔍 Checking package integrity..."
-npm pack --dry-run
+# ============================
+# PACKAGE CHECK
+# ============================
 
-if [ $? -ne 0 ]; then
-  echo "❌ Package check failed. Please fix the issues and try again."
-  exit 1
-fi
+echo "🔍 Running npm pack dry-run to verify publishability..."
+npm pack --dry-run > /dev/null
 
-# Publish to npm (or another registry)
-echo "🚀 Publishing to npm..."
+echo "✅ Package check passed."
+
+# ============================
+# PUBLISH
+# ============================
+
+echo "🚀 Publishing to npm registry: $NPM_REGISTRY ..."
 npm publish --access public --registry "$NPM_REGISTRY"
 
-# Check if publish succeeded
-if [ $? -eq 0 ]; then
-  echo "✅ Successfully published version $VERSION to npm."
-else
-  echo "❌ Error publishing package. Check the logs above for details."
-  exit 1
-fi
+echo "🎉 Successfully published version $VERSION to npm."
