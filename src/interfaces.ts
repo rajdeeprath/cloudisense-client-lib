@@ -173,35 +173,39 @@ export interface IClientChannel {
 
 
 export interface IServiceClient extends IClientChannel {
-    get_accessible_file_system_paths():Promise<any>
-    delete_file(path:string):Promise<any>
-    delete_folder(root:string, dirname:string, deleteNonEmpty:boolean):Promise<any>
-    download_file(path:string, mode:string):Promise<any>
-    list_path_content(root:string, path:string):Promise<any>
-    read_file(path:string):Promise<string>
-    write_file(path:string, content:string):Promise<void>
-    get_logs():Promise<Array<LogInfo>>
-    list_rules(head:boolean):Promise<Array<RuleInfo>>
-    reload_rules():Promise<any>
-    reload_rule(id:string):Promise<any>
-    get_rule(id:string):Promise<any>
-    generate_sample_rule():Promise<any>
-    write_rule(data:string, update:boolean):Promise<any>
-    delete_rule(id:string):Promise<string>
-    subscribe_datachannel(topic:string):Promise<any> 
-    subscribe_stats():Promise<any>   
-    subscribe_ui_updates():Promise<any>    
-    unsubscribe_stats():Promise<any>
-    subscribe_log(topic: string):Promise<any>   
-    unsubscribe_log(topic: string):Promise<void>
-    download_log(logkey: string, mode:string):Promise<string>
-    get_system_services():Promise<string[]>    
-    start_service(name: string):Promise<void>
-    stop_service(name: string):Promise<void>
-    restart_service(name: string):Promise<void>
-    execute_arbitrary_action(intent:string, params:any):Promise<void>    
-    connectWithAuthData(authData:AuthData):Promise<any>
+    get_accessible_file_system_paths(): Promise<any>;
+    delete_file(path: string): Promise<any>;
+    delete_folder(root: string, dirname: string, deleteNonEmpty: boolean): Promise<any>;
+    download_file(path: string, mode: string): Promise<any>;
+    list_path_content(root: string, path: string): Promise<any>;
+    read_file(path: string): Promise<string>;
+    write_file(path: string, content: string): Promise<void>;
+    get_logs(): Promise<Array<LogInfo>>;
+    list_rules(head: boolean): Promise<Array<RuleInfo>>;
+    reload_rules(): Promise<any>;
+    reload_rule(id: string): Promise<any>;
+    get_rule(id: string): Promise<any>;
+    generate_sample_rule(): Promise<any>;
+    write_rule(data: string, update: boolean): Promise<any>;
+    delete_rule(id: string): Promise<string>;
+    subscribe_datachannel(topic: string): Promise<any>;
+    subscribe_stats(): Promise<any>;
+    subscribe_ui_updates(): Promise<any>;
+    unsubscribe_stats(): Promise<any>;
+    subscribe_log(topic: string): Promise<any>;
+    unsubscribe_log(topic: string): Promise<void>;
+    download_log(logkey: string, mode: string): Promise<string>;
+    get_system_services(): Promise<string[]>;
+    start_service(name: string): Promise<void>;
+    stop_service(name: string): Promise<void>;
+    restart_service(name: string): Promise<void>;
+    execute_arbitrary_action(intent: string, params: any): Promise<void>;
+    connectWithAuthData(authData: AuthData): Promise<any>;
+    set_local_serviceId(value: string): void;
+    get local_serviceId(): string
+    set local_serviceId(value: string);
 }
+
 
 
 export interface IServiceChannel{
@@ -221,7 +225,7 @@ export interface IServiceSocket extends IServiceChannel {
     connectService: ()=>Promise<any>,
     disconnectService: ()=>void,
     is_connected: ()=>boolean,
-    doRPC: (methodName:string, params?:object)=>Promise<any>
+    doRPC: (serviceId: string, methodName:string, params?:object)=>Promise<any>
 }
 
 

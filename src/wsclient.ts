@@ -267,55 +267,57 @@ export class WSClient extends ChannelEventProvider implements IServiceSocket {
 
 
     /**
-     * Builds JSON request format for RPC with Cloudisense backend
-     * 
-     * @param requestid 
-     * @param intent 
-     * @param params 
-     * @returns 
+     * Builds a JSON-formatted RPC request compatible with the CloudiSENSE backend.
+     *
+     * @param requestid - A unique identifier for the request (used to track response).
+     * @param intent - The name of the action or command being requested.
+     * @param params - An object containing any parameters required by the intent.
+     * @param serviceId - Identifier of the target service. Can be null if not applicable.
+     * @returns A structured JSON object representing the RPC request.
      */
-    private buildRequest(requestid:string, intent:string, params:object)
-    {
+    private buildRequest(requestid: string, intent: string, params: object, serviceId: string) {
         return {
             "requestid": requestid,
             "intent": intent,
             "type": "rpc",
-            "params": params
+            "params": params,
+            "serviceId": serviceId
         }
     }
 
 
+
     /**
-     * Makes RPC request to server with an intent and parameter map
-     * `
-     * @param methodName 
-     * @param params 
+     * Makes an RPC request to the server with an intent and parameter map.
+     *
+     * @param intent - The name of the RPC method or action to perform.
+     * @param params - Optional parameters to include in the RPC request.
+     * @param serviceId - Optional service identifier. If not provided, null is passed to the request builder.
+     * @returns A Promise resolving to the RPC response from the server.
      */
-    public doRPC(intent:string, params?:object):Promise<any>{
-
-        if(params == undefined || params == null){
-            params = {}
+    public doRPC(serviceId: string, intent: string, params?: object): Promise<any> {
+        if (params == null) {
+            params = {};
         }
-        
-        let requestid = nanoid();
-        let request = this.buildRequest(requestid, intent, params)
-        let deferred = new Deferred();
-        let record = new RequestRecord(deferred, new Date().getUTCMilliseconds())
 
-        if (this.is_connected()) {                                
-                
-            try{
+        const requestId = nanoid();
+        const request = this.buildRequest(requestId, intent, params, serviceId);
+        const deferred = new Deferred();
+        const record = new RequestRecord(deferred, new Date().getUTCMilliseconds());
+
+        if (this.is_connected()) {
+            try {
                 setTimeout(() => {
-                    this._client.send(JSON.stringify(request))
-                }, 10);                    
-            }catch(err){
-                console.error("Unable to send request")
+                    this._client.send(JSON.stringify(request));
+                }, 10);
+            } catch (err) {
+                console.error("Unable to send request", err);
             }
-        }else{
-            console.error("Socket is not connected")
-        };
+        } else {
+            console.error("Socket is not connected");
+        }
 
-        this._requests.set(requestid, record)        
+        this._requests.set(requestId, record);
         return deferred.promise;
     }
 

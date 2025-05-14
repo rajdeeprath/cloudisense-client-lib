@@ -50,6 +50,8 @@ export class CloudisenseApiClient extends ClientEventProvider implements IServic
 
     private _topicevents = new EventList<IServiceClient, any>();
 
+    private _local_serviceId: string;
+
 
 
 
@@ -64,12 +66,69 @@ export class CloudisenseApiClient extends ClientEventProvider implements IServic
         this.authdata = config.authdata!;
         this.autoconnect = (typeof config.autoconnect === 'undefined' || config.autoconnect === null)?false:config.autoconnect
         this.reconnectOnFailure = (typeof config.reconnectOnFailure === 'undefined' || config.reconnectOnFailure === null)?false:config.reconnectOnFailure
-
+        this._local_serviceId = "";
 
         this._restEndPoint = "http" + "://" + this.host + ":" + this.port // fix this later
 
         return this
     }
+
+
+
+    /**
+     * Gets the current local service ID.
+     * @returns {string} The local service ID.
+     */
+    public get local_serviceId(): string {
+        return this._local_serviceId;
+    }
+
+
+
+    /**
+     * Sets the local service ID.
+     * @param {string} value - The new local service ID to set.
+     */
+    public set local_serviceId(value: string) {
+        this._local_serviceId = value;
+    }
+
+
+
+    /**
+     * Sets a new value for target_serviceId.
+     * @param {string | null} value - The new target service ID to set.
+     */
+    public set_local_serviceId(value: string):Promise<any> {
+        this._local_serviceId = value;
+        return new Promise((resolve,reject) => {
+            let promise: Promise<any> = this.doRPC("notify_service_of_interest", {"serviceId": value})
+            promise.then((data:any)=>{                
+                resolve(data)
+            }).catch((err)=>{
+                reject(err)
+            });
+        });
+    }
+
+
+
+    /**
+     * Performs an RPC call via the socket service, injecting the current serviceId.
+     * Throws an error if the serviceId is not set.
+     *
+     * @param intent - The intent of the RPC call.
+     * @param params - Optional parameters to send with the RPC call.
+     * @returns A Promise resolving with the RPC result.
+     */
+    private doRPC(intent: string, params?: object): Promise<any> {
+        const serviceId: string | null = this._local_serviceId;
+        if (!serviceId || serviceId == "") {
+            throw new Error("Target serviceId is not set. Cannot perform RPC.");
+        }
+        return this._socketservice.doRPC(serviceId, intent, params);
+    }
+
     
 
 
@@ -120,7 +179,7 @@ export class CloudisenseApiClient extends ClientEventProvider implements IServic
     {
         return new Promise((resolve,reject) => {
 
-            let promise: Promise<any> = this._socketservice.doRPC("get_accessible_paths", {})
+            let promise: Promise<any> = this.doRPC("get_accessible_paths", {})
             promise.then((data:any)=>{
                 resolve(data)
             }).catch((err)=>{
@@ -142,7 +201,7 @@ export class CloudisenseApiClient extends ClientEventProvider implements IServic
     {
         return new Promise((resolve,reject) => {
 
-            let promise: Promise<any> = this._socketservice.doRPC("delete_file", 
+            let promise: Promise<any> = this.doRPC("delete_file", 
             {
                 "path": path
             })
@@ -168,7 +227,7 @@ export class CloudisenseApiClient extends ClientEventProvider implements IServic
     {
         return new Promise((resolve,reject) => {
 
-            let promise: Promise<any> = this._socketservice.doRPC("delete_folder", 
+            let promise: Promise<any> = this.doRPC("delete_folder", 
             {
                 "root": root,
                 "dirname": dirname,
@@ -196,7 +255,7 @@ export class CloudisenseApiClient extends ClientEventProvider implements IServic
     {
         return new Promise((resolve,reject) => {
 
-            let promise: Promise<any> = this._socketservice.doRPC("download_file", 
+            let promise: Promise<any> = this.doRPC("download_file", 
             {
                 "path": path,
                 "mode": mode
@@ -223,7 +282,7 @@ export class CloudisenseApiClient extends ClientEventProvider implements IServic
     {
         return new Promise((resolve,reject) => {
 
-            let promise: Promise<any> = this._socketservice.doRPC("list_content", 
+            let promise: Promise<any> = this.doRPC("list_content", 
             {
                 "root": root,
                 "path": path
@@ -342,7 +401,7 @@ export class CloudisenseApiClient extends ClientEventProvider implements IServic
     {
         return new Promise((resolve,reject) => {
 
-            let promise: Promise<any> = this._socketservice.doRPC("list_logs")
+            let promise: Promise<any> = this.doRPC("list_logs")
             promise.then((data:Array<LogInfo>)=>{
                 resolve(data)
             }).catch((err)=>{
@@ -363,7 +422,7 @@ export class CloudisenseApiClient extends ClientEventProvider implements IServic
     {
         return new Promise((resolve,reject) => {
 
-            let promise: Promise<any> = this._socketservice.doRPC("list_rules", {"head": head})
+            let promise: Promise<any> = this.doRPC("list_rules", {"head": head})
             promise.then((data:Array<RuleInfo>)=>{
                 resolve(data)
             }).catch((err)=>{
@@ -384,7 +443,7 @@ export class CloudisenseApiClient extends ClientEventProvider implements IServic
     {
         return new Promise((resolve,reject) => {
 
-            let promise: Promise<any> = this._socketservice.doRPC("reload_rules", {})
+            let promise: Promise<any> = this.doRPC("reload_rules", {})
             promise.then((data:any)=>{
                 resolve(data)
             }).catch((err)=>{
@@ -407,7 +466,7 @@ export class CloudisenseApiClient extends ClientEventProvider implements IServic
     {
         return new Promise((resolve,reject) => {
 
-            let promise: Promise<any> = this._socketservice.doRPC("reload_rule", {"rule_id": id})
+            let promise: Promise<any> = this.doRPC("reload_rule", {"rule_id": id})
             promise.then((data:any)=>{
                 resolve(id)
             }).catch((err)=>{
@@ -429,7 +488,7 @@ export class CloudisenseApiClient extends ClientEventProvider implements IServic
      {
          return new Promise((resolve,reject) => {
  
-             let promise: Promise<any> = this._socketservice.doRPC("read_rule", {"rule_id": id})
+             let promise: Promise<any> = this.doRPC("read_rule", {"rule_id": id})
              promise.then((data:any)=>{
                  resolve(data)
              }).catch((err)=>{
@@ -451,7 +510,7 @@ export class CloudisenseApiClient extends ClientEventProvider implements IServic
      {
          return new Promise((resolve,reject) => {
  
-             let promise: Promise<any> = this._socketservice.doRPC("restart_self", {})
+             let promise: Promise<any> = this.doRPC("restart_self", {})
              promise.then((data:any = null)=>{
                  resolve(data)
              }).catch((err)=>{
@@ -473,7 +532,7 @@ export class CloudisenseApiClient extends ClientEventProvider implements IServic
      {
          return new Promise((resolve,reject) => {
  
-             let promise: Promise<any> = this._socketservice.doRPC("get_configuration", {})
+             let promise: Promise<any> = this.doRPC("get_configuration", {})
              promise.then((data:any)=>{
                  resolve(data)
              }).catch((err)=>{
@@ -495,7 +554,7 @@ export class CloudisenseApiClient extends ClientEventProvider implements IServic
      {
          return new Promise((resolve,reject) => {
  
-             let promise: Promise<any> = this._socketservice.doRPC("generate_sample", {})
+             let promise: Promise<any> = this.doRPC("generate_sample", {})
              promise.then((data:any)=>{
                  resolve(data)
              }).catch((err)=>{
@@ -519,7 +578,7 @@ export class CloudisenseApiClient extends ClientEventProvider implements IServic
      {
          return new Promise((resolve,reject) => {
  
-             let promise: Promise<any> = this._socketservice.doRPC("write_rule", {"rule_data": data, "update": update})
+             let promise: Promise<any> = this.doRPC("write_rule", {"rule_data": data, "update": update})
              promise.then((response:any)=>{
                  resolve(response)
              }).catch((err)=>{
@@ -540,7 +599,7 @@ export class CloudisenseApiClient extends ClientEventProvider implements IServic
     public delete_rule(id:string):Promise<string>
     {
         return new Promise((resolve,reject) => {
-            let promise: Promise<any> = this._socketservice.doRPC("delete_rule", {"rule_id": id})
+            let promise: Promise<any> = this.doRPC("delete_rule", {"rule_id": id})
             promise.then(()=>{
                 resolve(id)
             }).catch((err)=>{
@@ -564,7 +623,7 @@ export class CloudisenseApiClient extends ClientEventProvider implements IServic
             let payload = {
                 "topic": topic
             }
-            let promise: Promise<any> = this._socketservice.doRPC("subscribe_channel", payload)
+            let promise: Promise<any> = this.doRPC("subscribe_channel", payload)
             promise.then((data:any)=>{
                 resolve(data)
             }).catch((err)=>{
@@ -588,7 +647,7 @@ export class CloudisenseApiClient extends ClientEventProvider implements IServic
             let payload = {
                 "topic": TOPIC_STATS_MONITORING
             }
-            let promise: Promise<any> = this._socketservice.doRPC("subscribe_channel", payload)
+            let promise: Promise<any> = this.doRPC("subscribe_channel", payload)
             promise.then((data:any)=>{
                 resolve(data)
             }).catch((err)=>{
@@ -614,7 +673,7 @@ export class CloudisenseApiClient extends ClientEventProvider implements IServic
             let payload = {
                 "topic": TOPIC_UI_UPDATES
             }
-            let promise: Promise<any> = this._socketservice.doRPC("subscribe_channel", payload)
+            let promise: Promise<any> = this.doRPC("subscribe_channel", payload)
             promise.then((data:any)=>{
                 resolve(data)
             }).catch((err)=>{
@@ -639,7 +698,7 @@ export class CloudisenseApiClient extends ClientEventProvider implements IServic
             let payload = {
                 "topic": TOPIC_STATS_MONITORING
             }
-            let promise: Promise<any> = this._socketservice.doRPC("unsubscribe_channel", payload)
+            let promise: Promise<any> = this.doRPC("unsubscribe_channel", payload)
             promise.then((data:any)=>{
                 resolve(true)
             }).catch((err)=>{
@@ -664,7 +723,7 @@ export class CloudisenseApiClient extends ClientEventProvider implements IServic
             let payload = {
                 "topic": topic
             }
-            let promise: Promise<any> = this._socketservice.doRPC("subscribe_channel", payload)
+            let promise: Promise<any> = this.doRPC("subscribe_channel", payload)
             promise.then((data:any)=>{
                 resolve(data)
             }).catch((err)=>{
@@ -689,7 +748,7 @@ export class CloudisenseApiClient extends ClientEventProvider implements IServic
             let payload = {
                 "topic": topic
             }
-            let promise: Promise<any> = this._socketservice.doRPC("unsubscribe_channel", payload)
+            let promise: Promise<any> = this.doRPC("unsubscribe_channel", payload)
             promise.then((data:any)=>{
                 resolve(data)
             }).catch((err)=>{
@@ -754,7 +813,7 @@ export class CloudisenseApiClient extends ClientEventProvider implements IServic
     public get_system_services():Promise<string[]>
     {
         return new Promise((resolve,reject) => {
-            let promise: Promise<any> = this._socketservice.doRPC("list_targets")
+            let promise: Promise<any> = this.doRPC("list_targets")
             promise.then((data:any)=>{
                 resolve(data)
             }).catch((err)=>{
@@ -778,7 +837,7 @@ export class CloudisenseApiClient extends ClientEventProvider implements IServic
             let payload = {
                 "module": name
             }
-            let promise: Promise<any> = this._socketservice.doRPC("start_target", payload)
+            let promise: Promise<any> = this.doRPC("start_target", payload)
             promise.then((data:any)=>{
                 resolve(data)
             }).catch((err)=>{
@@ -802,7 +861,7 @@ export class CloudisenseApiClient extends ClientEventProvider implements IServic
             let payload = {
                 "module": name
             }
-            let promise: Promise<any> = this._socketservice.doRPC("stop_target", payload)
+            let promise: Promise<any> = this.doRPC("stop_target", payload)
             promise.then((data:any)=>{
                 resolve(data)
             }).catch((err)=>{
@@ -825,7 +884,7 @@ export class CloudisenseApiClient extends ClientEventProvider implements IServic
             let payload = {
                 "module": name
             }
-            let promise: Promise<any> = this._socketservice.doRPC("restart_target", payload)
+            let promise: Promise<any> = this.doRPC("restart_target", payload)
             promise.then((data:any)=>{
                 resolve(data)
             }).catch((err)=>{
@@ -850,7 +909,7 @@ export class CloudisenseApiClient extends ClientEventProvider implements IServic
     public execute_arbitrary_action(intent:string, params:any):Promise<void>
     {
         return new Promise((resolve,reject) => {
-            let promise: Promise<any> = this._socketservice.doRPC(intent, params)
+            let promise: Promise<any> = this.doRPC(intent, params)
             promise.then((data:any)=>{
                 resolve(data)
             }).catch((err)=>{
@@ -874,7 +933,7 @@ export class CloudisenseApiClient extends ClientEventProvider implements IServic
     {
         return new Promise((resolve, reject) => {
 
-            let promise: Promise<any> = this._socketservice.doRPC("query_assist", { "query": query });
+            let promise: Promise<any> = this.doRPC("query_assist", { "query": query });
             promise.then((data: any) => {
                 resolve(data);
             }).catch((err) => {
@@ -898,7 +957,7 @@ export class CloudisenseApiClient extends ClientEventProvider implements IServic
     {
         return new Promise((resolve, reject) => {
 
-            let promise: Promise<any> = this._socketservice.doRPC("clear_assist_session", {});
+            let promise: Promise<any> = this.doRPC("clear_assist_session", {});
             promise.then((data: any) => {
                 resolve(data);
             }).catch((err) => {
@@ -923,7 +982,7 @@ export class CloudisenseApiClient extends ClientEventProvider implements IServic
     {
         return new Promise((resolve, reject) => {
 
-            let promise: Promise<any> = this._socketservice.doRPC("assist_introduction", {});
+            let promise: Promise<any> = this.doRPC("assist_introduction", {});
             promise.then((data: any) => {
                 resolve(data);
             }).catch((err) => {
