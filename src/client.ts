@@ -52,6 +52,8 @@ export class CloudisenseApiClient extends ClientEventProvider implements IServic
 
     private _local_serviceId: string;
 
+    private _target_serviceId: string;
+
 
 
 
@@ -67,6 +69,7 @@ export class CloudisenseApiClient extends ClientEventProvider implements IServic
         this.autoconnect = (typeof config.autoconnect === 'undefined' || config.autoconnect === null)?false:config.autoconnect
         this.reconnectOnFailure = (typeof config.reconnectOnFailure === 'undefined' || config.reconnectOnFailure === null)?false:config.reconnectOnFailure
         this._local_serviceId = "";
+        this._target_serviceId = ""
 
         this._restEndPoint = "http" + "://" + this.host + ":" + this.port // fix this later
 
@@ -96,11 +99,54 @@ export class CloudisenseApiClient extends ClientEventProvider implements IServic
 
 
     /**
-     * Sets a new value for target_serviceId.
-     * @param {string | null} value - The new target service ID to set.
+     * Gets the current value of the target service ID.
+     * 
+     * @returns {string} The current target service ID.
+     */
+    public get target_serviceId(): string {
+        return this._target_serviceId;
+    }
+
+
+
+
+    /**
+     * Sets a new value for the target service ID.
+     * 
+     * @param {string} value - The new target service ID to assign.
+     */
+    public set target_serviceId(value: string) {
+        this._target_serviceId = value;
+    }
+
+
+
+
+    /**
+     * Sets a new value for _local_serviceId.
+     * @param {string | null} value - The new local service ID to set.
      */
     public set_local_serviceId(value: string):Promise<any> {
-        this._local_serviceId = value;
+        this._local_serviceId = this._target_serviceId = value 
+        return new Promise((resolve,reject) => {
+            let promise: Promise<any> = this.doRPC("notify_service_of_interest", {"serviceId": value})
+            promise.then((data:any)=>{                               
+                resolve(data)
+            }).catch((err)=>{
+                reject(err)
+            });
+        });
+    }
+
+
+
+
+    /**
+     * Sets a new value for _target_serviceId.
+     * @param {string | null} value - The new taRGET service ID to set.
+     */
+    public set_target_serviceId(value: string):Promise<any> {
+        this._target_serviceId = value;
         return new Promise((resolve,reject) => {
             let promise: Promise<any> = this.doRPC("notify_service_of_interest", {"serviceId": value})
             promise.then((data:any)=>{                
@@ -113,6 +159,7 @@ export class CloudisenseApiClient extends ClientEventProvider implements IServic
 
 
 
+
     /**
      * Performs an RPC call via the socket service, injecting the current serviceId.
      * Throws an error if the serviceId is not set.
@@ -122,7 +169,7 @@ export class CloudisenseApiClient extends ClientEventProvider implements IServic
      * @returns A Promise resolving with the RPC result.
      */
     private doRPC(intent: string, params?: object): Promise<any> {
-        const serviceId: string | null = this._local_serviceId;
+        const serviceId: string | null = this._target_serviceId;
         if (!serviceId || serviceId == "") {
             throw new Error("Target serviceId is not set. Cannot perform RPC.");
         }

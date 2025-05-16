@@ -201,9 +201,12 @@ export interface IServiceClient extends IClientChannel {
     restart_service(name: string): Promise<void>;
     execute_arbitrary_action(intent: string, params: any): Promise<void>;
     connectWithAuthData(authData: AuthData): Promise<any>;
-    set_local_serviceId(value: string): void;
+    set_local_serviceId(value: string): Promise<any>;
+    set_target_serviceId(value: string):Promise<any>;
     get local_serviceId(): string
     set local_serviceId(value: string);
+    get target_serviceId(): string;
+    set target_serviceId(value: string);
 }
 
 
