@@ -142,17 +142,29 @@ export class CloudisenseApiClient extends ClientEventProvider implements IServic
 
 
     /**
-     * Sets a new value for _target_serviceId.
-     * @param {string | null} value - The new taRGET service ID to set.
+     * Attempts to set the target service ID for future RPC calls by notifying the local instance.
+     *
+     * This method performs an RPC call to the local service (this._local_serviceId) with the intent 
+     * `"notify_service_of_interest"` and passes the desired `serviceId` as a parameter. 
+     * 
+     * If the call succeeds, it updates the internal `_target_serviceId` to the provided value. 
+     * If the call fails, the internal state remains unchanged.
+     *
+     * @param value - The desired target service ID to be set.
+     * @returns A Promise that resolves with the RPC response if successful, or rejects with an error if the RPC fails.
      */
-    public set_target_serviceId(value: string):Promise<any> {
-        this._target_serviceId = value;
-        return new Promise((resolve,reject) => {
-            let promise: Promise<any> = this.doRPC("notify_service_of_interest", {"serviceId": value})
-            promise.then((data:any)=>{                
-                resolve(data)
-            }).catch((err)=>{
-                reject(err)
+    public set_target_serviceId(value: string): Promise<any> {
+        if (!value || value.trim() === "") {
+            throw new Error("Invalid serviceId provided.");
+        }
+
+        return new Promise((resolve, reject) => {
+            let promise: Promise<any> = this.doRPC("notify_service_of_interest", { serviceId: value }, this._local_serviceId);
+            promise.then((data: any) => {
+                this._target_serviceId = value;
+                resolve(data);
+            }).catch((err) => {
+                reject(err);
             });
         });
     }
@@ -161,16 +173,18 @@ export class CloudisenseApiClient extends ClientEventProvider implements IServic
 
 
     /**
-     * Performs an RPC call via the socket service, injecting the current serviceId.
-     * Throws an error if the serviceId is not set.
+     * Performs an RPC (Remote Procedure Call) to a specified service.
      *
-     * @param intent - The intent of the RPC call.
-     * @param params - Optional parameters to send with the RPC call.
-     * @returns A Promise resolving with the RPC result.
+     * @param intent - The intent or command to be executed on the target service.
+     * @param params - Optional parameters to send with the RPC request.
+     * @param _serviceId - (Optional) Explicit service ID to override the default target.
+     *                     If not provided, the method uses this._target_serviceId.
+     * @returns A Promise resolving with the response from the target service.
+     * @throws Error if no valid service ID is available for the RPC call.
      */
-    private doRPC(intent: string, params?: object): Promise<any> {
-        const serviceId: string | null = this._target_serviceId;
-        if (!serviceId || serviceId == "") {
+    private doRPC(intent: string, params?: object, _serviceId?: string): Promise<any> {
+        const serviceId: string | null = _serviceId || this._target_serviceId;
+        if (!serviceId || serviceId === "") {
             throw new Error("Target serviceId is not set. Cannot perform RPC.");
         }
         return this._socketservice.doRPC(serviceId, intent, params);
