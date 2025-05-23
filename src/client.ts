@@ -19,7 +19,7 @@
 
 import 'reflect-metadata';
 import { IServiceClient, IServiceSocket, IClientConfig } from "./interfaces";
-import { WSClient} from "./wsclient";
+import { WSClient } from "./wsclient";
 import { sha256, sha224 } from 'js-sha256';
 import { EventList, IEventHandler } from "strongly-typed-events";
 import { ClientEventProvider } from "./event/eventprovider";
@@ -38,15 +38,15 @@ export class CloudisenseApiClient extends ClientEventProvider implements IServic
     port: number;
     autoconnect?: boolean;
     reconnectOnFailure?: boolean;
-    authdata:AuthData;
+    authdata: AuthData;
 
     private _socketservice!: IServiceSocket;
-    private _restEndPoint:string;
+    private _restEndPoint: string;
     private _authtime!: number;
 
-    private _lastCredentials!:Credentials;
-    private _errorCount:number;
-    private static MAX_ERROR_TOLERANCE:number = 5;
+    private _lastCredentials!: Credentials;
+    private _errorCount: number;
+    private static MAX_ERROR_TOLERANCE: number = 5;
 
     private _topicevents = new EventList<IServiceClient, any>();
 
@@ -57,17 +57,17 @@ export class CloudisenseApiClient extends ClientEventProvider implements IServic
 
 
 
-    constructor (config:IClientConfig) {      
-        
+    constructor(config: IClientConfig) {
+
         super()
 
         this._errorCount = 0;
-        
+
         this.host = config.host
         this.port = config.port
         this.authdata = config.authdata!;
-        this.autoconnect = (typeof config.autoconnect === 'undefined' || config.autoconnect === null)?false:config.autoconnect
-        this.reconnectOnFailure = (typeof config.reconnectOnFailure === 'undefined' || config.reconnectOnFailure === null)?false:config.reconnectOnFailure
+        this.autoconnect = (typeof config.autoconnect === 'undefined' || config.autoconnect === null) ? false : config.autoconnect
+        this.reconnectOnFailure = (typeof config.reconnectOnFailure === 'undefined' || config.reconnectOnFailure === null) ? false : config.reconnectOnFailure
         this._local_serviceId = "";
         this._target_serviceId = ""
 
@@ -121,18 +121,55 @@ export class CloudisenseApiClient extends ClientEventProvider implements IServic
 
 
 
+    /**
+     * Returns a normalized topic string prefixed with the given identity.
+     * Ensures exactly one slash between identity and topic, and that the result starts with '/'.
+     *
+     * Example:
+     *   identity = "node-1", topic = "/stats/monitoring"
+     *   → "/node-1/stats/monitoring"
+     */
+    public formatTopicWithIdentity(identity: string, topic: string): string {
+        const cleanIdentity = identity.replace(/^\/+|\/+$/g, ''); // strip all leading/trailing slashes
+        const cleanTopic = topic.replace(/^\/+/, '');             // strip leading slashes only
+
+        return `/${cleanIdentity}/${cleanTopic}`;
+    }
+
+
+
+    /**
+     * Returns a normalized topic string prefixed with this client's identity.
+     * Ensures the topic starts with a single '/' and avoids any double slashes.
+     *
+     * Example:
+     *   identity = "node-1", subpath = "/ui/guide"
+     *   → "/node-1/ui/guide"
+     *
+     * @param subpath - Relative topic path (e.g., "ui/guide")
+     * @returns Fully qualified topic (e.g., "/node-1/ui/guide")
+     */
+    public getTopicFor(subpath: string): string {
+        const cleanIdentity = this.target_serviceId.replace(/^\/+|\/+$/g, '');
+        const cleanSubpath = subpath.replace(/^\/+/, '');
+
+        return `/${cleanIdentity}/${cleanSubpath}`;
+    }
+
+
+
 
     /**
      * Sets a new value for _local_serviceId.
      * @param {string | null} value - The new local service ID to set.
      */
-    public set_local_serviceId(value: string):Promise<any> {
-        this._local_serviceId = this._target_serviceId = value 
-        return new Promise((resolve,reject) => {
-            let promise: Promise<any> = this.doRPC("notify_service_of_interest", {"serviceId": value})
-            promise.then((data:any)=>{                               
+    public set_local_serviceId(value: string): Promise<any> {
+        this._local_serviceId = this._target_serviceId = value
+        return new Promise((resolve, reject) => {
+            let promise: Promise<any> = this.doRPC("notify_service_of_interest", { "serviceId": value })
+            promise.then((data: any) => {
                 resolve(data)
-            }).catch((err)=>{
+            }).catch((err) => {
                 reject(err)
             });
         });
@@ -190,7 +227,7 @@ export class CloudisenseApiClient extends ClientEventProvider implements IServic
         return this._socketservice.doRPC(serviceId, intent, params);
     }
 
-    
+
 
 
     /**
@@ -236,14 +273,13 @@ export class CloudisenseApiClient extends ClientEventProvider implements IServic
      * 
      * @returns Promise that resolved to root path data of the filesystem
      */
-    public get_accessible_file_system_paths():Promise<any>
-    {
-        return new Promise((resolve,reject) => {
+    public get_accessible_file_system_paths(): Promise<any> {
+        return new Promise((resolve, reject) => {
 
             let promise: Promise<any> = this.doRPC("get_accessible_paths", {})
-            promise.then((data:any)=>{
+            promise.then((data: any) => {
                 resolve(data)
-            }).catch((err)=>{
+            }).catch((err) => {
                 reject(err)
             });
 
@@ -258,18 +294,17 @@ export class CloudisenseApiClient extends ClientEventProvider implements IServic
      * @param path The path of the file to delete
      * @returns Promise that resolves to nothing if operation is successful and error if unsuccessful
      */
-    public delete_file(path:string):Promise<any>
-    {
-        return new Promise((resolve,reject) => {
+    public delete_file(path: string): Promise<any> {
+        return new Promise((resolve, reject) => {
 
-            let promise: Promise<any> = this.doRPC("delete_file", 
-            {
-                "path": path
-            })
+            let promise: Promise<any> = this.doRPC("delete_file",
+                {
+                    "path": path
+                })
 
-            promise.then((data:any)=>{
+            promise.then((data: any) => {
                 resolve(data)
-            }).catch((err)=>{
+            }).catch((err) => {
                 reject(err)
             });
 
@@ -284,20 +319,19 @@ export class CloudisenseApiClient extends ClientEventProvider implements IServic
      * @param path The path of the directory to delete
      * @returns Promise that resolves to nothing if operation is successful and error if unsuccessful
      */
-    public delete_folder(root:string, dirname:string, deleteNonEmpty:boolean = false):Promise<any>
-    {
-        return new Promise((resolve,reject) => {
+    public delete_folder(root: string, dirname: string, deleteNonEmpty: boolean = false): Promise<any> {
+        return new Promise((resolve, reject) => {
 
-            let promise: Promise<any> = this.doRPC("delete_folder", 
-            {
-                "root": root,
-                "dirname": dirname,
-                "delete_non_empty": deleteNonEmpty
-            })
+            let promise: Promise<any> = this.doRPC("delete_folder",
+                {
+                    "root": root,
+                    "dirname": dirname,
+                    "delete_non_empty": deleteNonEmpty
+                })
 
-            promise.then((data:any)=>{
+            promise.then((data: any) => {
                 resolve(data)
-            }).catch((err)=>{
+            }).catch((err) => {
                 reject(err)
             });
 
@@ -312,19 +346,18 @@ export class CloudisenseApiClient extends ClientEventProvider implements IServic
      * @param path The path of the file to download
      * @returns Promise that resolves to a download link if operation is successful and error if unsuccessful
      */
-    public download_file(path:string, mode:string = "static"):Promise<any>
-    {
-        return new Promise((resolve,reject) => {
+    public download_file(path: string, mode: string = "static"): Promise<any> {
+        return new Promise((resolve, reject) => {
 
-            let promise: Promise<any> = this.doRPC("download_file", 
-            {
-                "path": path,
-                "mode": mode
-            })
+            let promise: Promise<any> = this.doRPC("download_file",
+                {
+                    "path": path,
+                    "mode": mode
+                })
 
-            promise.then((data:any)=>{
+            promise.then((data: any) => {
                 resolve(data)
-            }).catch((err)=>{
+            }).catch((err) => {
                 reject(err)
             });
 
@@ -339,19 +372,18 @@ export class CloudisenseApiClient extends ClientEventProvider implements IServic
      * 
      * @returns Promise that resolved to path content (if any)
      */
-    public list_path_content(root:string, path:string = ""):Promise<any>
-    {
-        return new Promise((resolve,reject) => {
+    public list_path_content(root: string, path: string = ""): Promise<any> {
+        return new Promise((resolve, reject) => {
 
-            let promise: Promise<any> = this.doRPC("list_content", 
-            {
-                "root": root,
-                "path": path
-            })
+            let promise: Promise<any> = this.doRPC("list_content",
+                {
+                    "root": root,
+                    "path": path
+                })
 
-            promise.then((data:any)=>{
+            promise.then((data: any) => {
                 resolve(data)
-            }).catch((err)=>{
+            }).catch((err) => {
                 reject(err)
             });
 
@@ -365,40 +397,37 @@ export class CloudisenseApiClient extends ClientEventProvider implements IServic
      * 
      * @returns 
      */
-    public read_file(path:string):Promise<string>
-    {
-        const promise:Promise<any> = new Promise((resolve,reject) => {
+    public read_file(path: string): Promise<string> {
+        const promise: Promise<any> = new Promise((resolve, reject) => {
 
             const url = this.getBaseAPIendPoint() + "/file/read"
 
             const params = new URLSearchParams()
             params.append('path', path)
-    
+
             const config = {
                 headers: {
                     'Content-Type': 'application/x-www-form-urlencoded'
                 }
             }
-    
-            const promise = axios.post(url, params, config)
-    
-            promise.then((result:any) => {
 
-                if(result.status == 200)
-                {
+            const promise = axios.post(url, params, config)
+
+            promise.then((result: any) => {
+
+                if (result.status == 200) {
                     const content = Base64.decode(result.data.data as string)
                     console.debug(content)
                     resolve(content)
                 }
-                else
-                {
+                else {
                     throw new Error("Invalid or unexpected response")
                 }
             })
-            .catch((err:any) => {
-                console.error(err.toString())
-                reject(err)
-            })    
+                .catch((err: any) => {
+                    console.error(err.toString())
+                    reject(err)
+                })
 
         });
 
@@ -411,40 +440,37 @@ export class CloudisenseApiClient extends ClientEventProvider implements IServic
      * 
      * @returns 
      */
-    public write_file(path:string, content:string):Promise<void>
-    {
-        const promise:Promise<any> = new Promise((resolve,reject) => {
+    public write_file(path: string, content: string): Promise<void> {
+        const promise: Promise<any> = new Promise((resolve, reject) => {
 
             const url = this.getBaseAPIendPoint() + "/file/write"
 
             const params = new URLSearchParams()
             params.append('path', path)
             params.append('content', Base64.encode(content))
-    
+
             const config = {
                 headers: {
                     'Content-Type': 'application/x-www-form-urlencoded'
                 }
             }
-    
+
             const promise = axios.post(url, params, config)
-    
-            promise.then((result:any) => {
-                if(result.status == 200)
-                {
+
+            promise.then((result: any) => {
+                if (result.status == 200) {
                     const content = Base64.decode(result.data.data as string)
                     console.debug(content)
                     resolve(content)
                 }
-                else
-                {
+                else {
                     throw new Error("Invalid or unexpected response")
-                }              
+                }
             })
-            .catch((err:any) => {
-                console.error(err.toString())
-                reject(err)
-            })    
+                .catch((err: any) => {
+                    console.error(err.toString())
+                    reject(err)
+                })
 
         });
 
@@ -458,14 +484,13 @@ export class CloudisenseApiClient extends ClientEventProvider implements IServic
      * 
      * @returns Promise that resolved to List of logs
      */
-    public get_logs():Promise<Array<LogInfo>>
-    {
-        return new Promise((resolve,reject) => {
+    public get_logs(): Promise<Array<LogInfo>> {
+        return new Promise((resolve, reject) => {
 
             let promise: Promise<any> = this.doRPC("list_logs")
-            promise.then((data:Array<LogInfo>)=>{
+            promise.then((data: Array<LogInfo>) => {
                 resolve(data)
-            }).catch((err)=>{
+            }).catch((err) => {
                 reject(err)
             });
 
@@ -479,14 +504,13 @@ export class CloudisenseApiClient extends ClientEventProvider implements IServic
      * 
      * @returns Promise that resolved to List of ReactionRules
      */
-    public list_rules(head:boolean = true):Promise<Array<RuleInfo>>
-    {
-        return new Promise((resolve,reject) => {
+    public list_rules(head: boolean = true): Promise<Array<RuleInfo>> {
+        return new Promise((resolve, reject) => {
 
-            let promise: Promise<any> = this.doRPC("list_rules", {"head": head})
-            promise.then((data:Array<RuleInfo>)=>{
+            let promise: Promise<any> = this.doRPC("list_rules", { "head": head })
+            promise.then((data: Array<RuleInfo>) => {
                 resolve(data)
-            }).catch((err)=>{
+            }).catch((err) => {
                 reject(err)
             });
 
@@ -500,14 +524,13 @@ export class CloudisenseApiClient extends ClientEventProvider implements IServic
      * 
      * @returns Promise that resolved to nothing
      */
-    public reload_rules():Promise<any>
-    {
-        return new Promise((resolve,reject) => {
+    public reload_rules(): Promise<any> {
+        return new Promise((resolve, reject) => {
 
             let promise: Promise<any> = this.doRPC("reload_rules", {})
-            promise.then((data:any)=>{
+            promise.then((data: any) => {
                 resolve(data)
-            }).catch((err)=>{
+            }).catch((err) => {
                 reject(err)
             });
 
@@ -523,14 +546,13 @@ export class CloudisenseApiClient extends ClientEventProvider implements IServic
      * 
      * @returns Promise that resolved to id of the reaction rule
      */
-    public reload_rule(id:string):Promise<any>
-    {
-        return new Promise((resolve,reject) => {
+    public reload_rule(id: string): Promise<any> {
+        return new Promise((resolve, reject) => {
 
-            let promise: Promise<any> = this.doRPC("reload_rule", {"rule_id": id})
-            promise.then((data:any)=>{
+            let promise: Promise<any> = this.doRPC("reload_rule", { "rule_id": id })
+            promise.then((data: any) => {
                 resolve(id)
-            }).catch((err)=>{
+            }).catch((err) => {
                 reject(err)
             });
 
@@ -540,70 +562,67 @@ export class CloudisenseApiClient extends ClientEventProvider implements IServic
 
 
 
-     /**
-     * Gets rule data of a reaction engine rule by specified id
-     * 
-     * @returns Promise that resolved to Rule data
-     */
-     public get_rule(id:string):Promise<any>
-     {
-         return new Promise((resolve,reject) => {
- 
-             let promise: Promise<any> = this.doRPC("read_rule", {"rule_id": id})
-             promise.then((data:any)=>{
-                 resolve(data)
-             }).catch((err)=>{
-                 reject(err)
-             });
- 
-         });
-     }
+    /**
+    * Gets rule data of a reaction engine rule by specified id
+    * 
+    * @returns Promise that resolved to Rule data
+    */
+    public get_rule(id: string): Promise<any> {
+        return new Promise((resolve, reject) => {
+
+            let promise: Promise<any> = this.doRPC("read_rule", { "rule_id": id })
+            promise.then((data: any) => {
+                resolve(data)
+            }).catch((err) => {
+                reject(err)
+            });
+
+        });
+    }
 
 
 
-     /**
-     * Requests service to initiate restart via systemctl.
-     * Server should have sufficient permissions to execute the command
-     * 
-     * @returns Promise that resolved to nothing (no return value)
-     */
-     public request_restart(id:string):Promise<any>
-     {
-         return new Promise((resolve,reject) => {
- 
-             let promise: Promise<any> = this.doRPC("restart_self", {})
-             promise.then((data:any = null)=>{
-                 resolve(data)
-             }).catch((err)=>{
-                 reject(err)
-             });
- 
-         });
-     }
+    /**
+    * Requests service to initiate restart via systemctl.
+    * Server should have sufficient permissions to execute the command
+    * 
+    * @returns Promise that resolved to nothing (no return value)
+    */
+    public request_restart(id: string): Promise<any> {
+        return new Promise((resolve, reject) => {
+
+            let promise: Promise<any> = this.doRPC("restart_self", {})
+            promise.then((data: any = null) => {
+                resolve(data)
+            }).catch((err) => {
+                reject(err)
+            });
+
+        });
+    }
 
 
 
 
-     /**
-     * Requests to load settings / configuration information from the server
-     * 
-     * @returns Promise that resolved to settings data
-     */
-     public loadSettings():Promise<any>
-     {
-         return new Promise((resolve,reject) => {
- 
-             let promise: Promise<any> = this.doRPC("get_configuration", {})
-             promise.then((data:any)=>{
-                 resolve(data)
-             }).catch((err)=>{
-                 reject(err)
-             });
- 
-         });
-     }
+    /**
+    * Requests to load settings / configuration information from the server
+    * 
+    * @returns Promise that resolved to settings data
+    */
+    public loadSettings(): Promise<any> {
+        return new Promise((resolve, reject) => {
 
-     
+            let promise: Promise<any> = this.doRPC("get_configuration", {})
+            promise.then((data: any) => {
+                resolve(data)
+            }).catch((err) => {
+                reject(err)
+            });
+
+        });
+    }
+
+
 
 
     /**
@@ -611,43 +630,41 @@ export class CloudisenseApiClient extends ClientEventProvider implements IServic
      * 
      * @returns Promise that resolved to Rule data
      */
-     public generate_sample_rule():Promise<any>
-     {
-         return new Promise((resolve,reject) => {
- 
-             let promise: Promise<any> = this.doRPC("generate_sample", {})
-             promise.then((data:any)=>{
-                 resolve(data)
-             }).catch((err)=>{
-                 reject(err)
-             });
- 
-         });
-     }
+    public generate_sample_rule(): Promise<any> {
+        return new Promise((resolve, reject) => {
+
+            let promise: Promise<any> = this.doRPC("generate_sample", {})
+            promise.then((data: any) => {
+                resolve(data)
+            }).catch((err) => {
+                reject(err)
+            });
+
+        });
+    }
 
 
 
 
 
 
-     /**
-     * Saves rule data of a reaction engine rule on server
-     * 
-     * @returns Promise that resolved to Rule Id on successful write
-     */
-     public write_rule(data:string, update=true):Promise<any>
-     {
-         return new Promise((resolve,reject) => {
- 
-             let promise: Promise<any> = this.doRPC("write_rule", {"rule_data": data, "update": update})
-             promise.then((response:any)=>{
-                 resolve(response)
-             }).catch((err)=>{
-                 reject(err)
-             });
- 
-         });
-     }
+    /**
+    * Saves rule data of a reaction engine rule on server
+    * 
+    * @returns Promise that resolved to Rule Id on successful write
+    */
+    public write_rule(data: string, update = true): Promise<any> {
+        return new Promise((resolve, reject) => {
+
+            let promise: Promise<any> = this.doRPC("write_rule", { "rule_data": data, "update": update })
+            promise.then((response: any) => {
+                resolve(response)
+            }).catch((err) => {
+                reject(err)
+            });
+
+        });
+    }
 
 
 
@@ -657,13 +674,12 @@ export class CloudisenseApiClient extends ClientEventProvider implements IServic
      * 
      * @returns Promise that resolves to the id of the deleted rule
      */
-    public delete_rule(id:string):Promise<string>
-    {
-        return new Promise((resolve,reject) => {
-            let promise: Promise<any> = this.doRPC("delete_rule", {"rule_id": id})
-            promise.then(()=>{
+    public delete_rule(id: string): Promise<string> {
+        return new Promise((resolve, reject) => {
+            let promise: Promise<any> = this.doRPC("delete_rule", { "rule_id": id })
+            promise.then(() => {
                 resolve(id)
-            }).catch((err)=>{
+            }).catch((err) => {
                 reject(err)
             });
         });
@@ -677,17 +693,16 @@ export class CloudisenseApiClient extends ClientEventProvider implements IServic
      * 
      * @returns Promise that resolved to subscribable topic path for the data channel for stats
      */
-    public subscribe_datachannel(topic:string):Promise<any> 
-    {
-        return new Promise((resolve,reject) => {
+    public subscribe_datachannel(topic: string): Promise<any> {
+        return new Promise((resolve, reject) => {
 
             let payload = {
                 "topic": topic
             }
             let promise: Promise<any> = this.doRPC("subscribe_channel", payload)
-            promise.then((data:any)=>{
+            promise.then((data: any) => {
                 resolve(data)
-            }).catch((err)=>{
+            }).catch((err) => {
                 reject(err)
             });
 
@@ -701,17 +716,16 @@ export class CloudisenseApiClient extends ClientEventProvider implements IServic
      * 
      * @returns Promise that resolved to subscribable topic path for the data channel for stats
      */
-    public subscribe_stats():Promise<any>
-    {
-        return new Promise((resolve,reject) => {
-
+    public subscribe_stats(): Promise<any> {
+        return new Promise((resolve, reject) => {
+            const service_topic = this.formatTopicWithIdentity(this.target_serviceId, TOPIC_STATS_MONITORING)
             let payload = {
-                "topic": TOPIC_STATS_MONITORING
+                "topic": service_topic
             }
             let promise: Promise<any> = this.doRPC("subscribe_channel", payload)
-            promise.then((data:any)=>{
+            promise.then((data: any) => {
                 resolve(data)
-            }).catch((err)=>{
+            }).catch((err) => {
                 reject(err)
             });
 
@@ -720,24 +734,24 @@ export class CloudisenseApiClient extends ClientEventProvider implements IServic
 
 
 
-    
+
 
     /**
      * Subscribes to ui updates channel (topic path) to get data updates for dashboard widgets
      * 
      * @returns Promise that resolved to subscribable topic path for the data channel for stats
      */
-    public subscribe_ui_updates():Promise<any>
-    {
-        return new Promise((resolve,reject) => {
+    public subscribe_ui_updates(): Promise<any> {
+        return new Promise((resolve, reject) => {
 
+            const service_topic = this.formatTopicWithIdentity(this.target_serviceId, TOPIC_UI_UPDATES)
             let payload = {
-                "topic": TOPIC_UI_UPDATES
+                "topic": service_topic
             }
             let promise: Promise<any> = this.doRPC("subscribe_channel", payload)
-            promise.then((data:any)=>{
+            promise.then((data: any) => {
                 resolve(data)
-            }).catch((err)=>{
+            }).catch((err) => {
                 reject(err)
             });
 
@@ -752,23 +766,22 @@ export class CloudisenseApiClient extends ClientEventProvider implements IServic
      * 
      * @returns Promise that resolved to boolean true on unsubscribe success
      */
-    public unsubscribe_stats():Promise<any>
-    {
-        return new Promise((resolve,reject) => {
-
+    public unsubscribe_stats(): Promise<any> {
+        return new Promise((resolve, reject) => {
+            const service_topic = this.formatTopicWithIdentity(this.target_serviceId, TOPIC_STATS_MONITORING)
             let payload = {
-                "topic": TOPIC_STATS_MONITORING
+                "topic": service_topic
             }
             let promise: Promise<any> = this.doRPC("unsubscribe_channel", payload)
-            promise.then((data:any)=>{
+            promise.then((data: any) => {
                 resolve(true)
-            }).catch((err)=>{
+            }).catch((err) => {
                 reject(err)
             });
 
         });
     }
-    
+
 
 
     /**
@@ -777,17 +790,16 @@ export class CloudisenseApiClient extends ClientEventProvider implements IServic
      * @param topic 
      * @returns Promise that resolved to subscribable topic path for the data channel of thsi log
      */
-    public subscribe_log(topic: string):Promise<any>
-    {
-        return new Promise((resolve,reject) => {
-
+    public subscribe_log(topic: string): Promise<any> {
+        return new Promise((resolve, reject) => {
+            const service_topic = this.formatTopicWithIdentity(this.target_serviceId, topic)
             let payload = {
-                "topic": topic
+                "topic": service_topic
             }
             let promise: Promise<any> = this.doRPC("subscribe_channel", payload)
-            promise.then((data:any)=>{
-                resolve(data)
-            }).catch((err)=>{
+            promise.then((data: any) => {
+                resolve(payload)
+            }).catch((err) => {
                 reject(err)
             });
 
@@ -802,17 +814,16 @@ export class CloudisenseApiClient extends ClientEventProvider implements IServic
      * @param logkey 
      * @returns 
      */
-    public unsubscribe_log(topic: string):Promise<void>
-    {
-        return new Promise((resolve,reject) => {
-
+    public unsubscribe_log(topic: string): Promise<any> {
+        return new Promise((resolve, reject) => {
+            const service_topic = this.formatTopicWithIdentity(this.target_serviceId, topic)
             let payload = {
-                "topic": topic
+                "topic": service_topic
             }
             let promise: Promise<any> = this.doRPC("unsubscribe_channel", payload)
-            promise.then((data:any)=>{
-                resolve(data)
-            }).catch((err)=>{
+            promise.then((data: any) => {
+                resolve(payload)
+            }).catch((err) => {
                 reject(err)
             });
 
@@ -826,38 +837,35 @@ export class CloudisenseApiClient extends ClientEventProvider implements IServic
      * @param logkey 
      * @returns 
      */
-    public download_log(logkey: string, mode:string = "static"):Promise<string>
-    {
-        const promise:Promise<any> = new Promise((resolve,reject) => {
+    public download_log(logkey: string, mode: string = "static"): Promise<string> {
+        const promise: Promise<any> = new Promise((resolve, reject) => {
 
             const url = this.getBaseAPIendPoint() + "/log/download/" + mode
             const params = new URLSearchParams()
             params.append('logname', logkey)
-    
+
             const config = {
                 headers: {
                     'Content-Type': 'application/x-www-form-urlencoded'
                 }
             }
-    
-            const promise = axios.post(url, params, config)
-    
-            promise.then((result:any) => {
 
-                if(result.data.status == "success")
-                {
+            const promise = axios.post(url, params, config)
+
+            promise.then((result: any) => {
+
+                if (result.data.status == "success") {
                     const download_url = this.getBaseAPIendPoint() + "/" + result.data.data
-                    resolve(download_url) 
+                    resolve(download_url)
                 }
-                else
-                {
+                else {
                     throw new Error('Exception response received ' + JSON.stringify(result));
                 }
-                               
+
             })
-            .catch((err:any) => {
-                reject(err)
-            })    
+                .catch((err: any) => {
+                    reject(err)
+                })
 
         });
 
@@ -871,13 +879,12 @@ export class CloudisenseApiClient extends ClientEventProvider implements IServic
      * 
      * @returns 
      */
-    public get_system_services():Promise<string[]>
-    {
-        return new Promise((resolve,reject) => {
+    public get_system_services(): Promise<string[]> {
+        return new Promise((resolve, reject) => {
             let promise: Promise<any> = this.doRPC("list_targets")
-            promise.then((data:any)=>{
+            promise.then((data: any) => {
                 resolve(data)
-            }).catch((err)=>{
+            }).catch((err) => {
                 reject(err)
             });
 
@@ -892,16 +899,15 @@ export class CloudisenseApiClient extends ClientEventProvider implements IServic
      * @param name 
      * @returns 
      */
-    public start_service(name: string):Promise<void>
-    {
-        return new Promise((resolve,reject) => {
+    public start_service(name: string): Promise<void> {
+        return new Promise((resolve, reject) => {
             let payload = {
                 "module": name
             }
             let promise: Promise<any> = this.doRPC("start_target", payload)
-            promise.then((data:any)=>{
+            promise.then((data: any) => {
                 resolve(data)
-            }).catch((err)=>{
+            }).catch((err) => {
                 reject(err)
             });
 
@@ -909,23 +915,22 @@ export class CloudisenseApiClient extends ClientEventProvider implements IServic
     }
 
 
-    
+
     /**
      * Stops a system service using its name
      * 
      * @param name 
      * @returns 
      */
-    public stop_service(name: string):Promise<void>
-    {
-        return new Promise((resolve,reject) => {
+    public stop_service(name: string): Promise<void> {
+        return new Promise((resolve, reject) => {
             let payload = {
                 "module": name
             }
             let promise: Promise<any> = this.doRPC("stop_target", payload)
-            promise.then((data:any)=>{
+            promise.then((data: any) => {
                 resolve(data)
-            }).catch((err)=>{
+            }).catch((err) => {
                 reject(err)
             });
 
@@ -939,16 +944,15 @@ export class CloudisenseApiClient extends ClientEventProvider implements IServic
      * @param name 
      * @returns
      */
-    public restart_service(name: string):Promise<void>
-    {
-        return new Promise((resolve,reject) => {
+    public restart_service(name: string): Promise<void> {
+        return new Promise((resolve, reject) => {
             let payload = {
                 "module": name
             }
             let promise: Promise<any> = this.doRPC("restart_target", payload)
-            promise.then((data:any)=>{
+            promise.then((data: any) => {
                 resolve(data)
-            }).catch((err)=>{
+            }).catch((err) => {
                 reject(err)
             });
 
@@ -967,13 +971,12 @@ export class CloudisenseApiClient extends ClientEventProvider implements IServic
      * @param params 
      * @returns 
      */
-    public execute_arbitrary_action(intent:string, params:any):Promise<void>
-    {
-        return new Promise((resolve,reject) => {
+    public execute_arbitrary_action(intent: string, params: any): Promise<void> {
+        return new Promise((resolve, reject) => {
             let promise: Promise<any> = this.doRPC(intent, params)
-            promise.then((data:any)=>{
+            promise.then((data: any) => {
                 resolve(data)
-            }).catch((err)=>{
+            }).catch((err) => {
                 reject(err)
             });
 
@@ -990,8 +993,7 @@ export class CloudisenseApiClient extends ClientEventProvider implements IServic
      * @param query - The input query to be processed by smart assist.
      * @returns Promise that resolves with the response data from the smart assist system.
      */
-    public query_smart_assist(query: string): Promise<any>
-    {
+    public query_smart_assist(query: string): Promise<any> {
         return new Promise((resolve, reject) => {
 
             let promise: Promise<any> = this.doRPC("query_assist", { "query": query });
@@ -1014,8 +1016,7 @@ export class CloudisenseApiClient extends ClientEventProvider implements IServic
      * @param query - (Unused) Reserved for future input parameters.
      * @returns Promise that resolves with the result of the session reset operation.
      */
-    public reset_smart_assist_session(query: string): Promise<any>
-    {
+    public reset_smart_assist_session(query: string): Promise<any> {
         return new Promise((resolve, reject) => {
 
             let promise: Promise<any> = this.doRPC("clear_assist_session", {});
@@ -1039,8 +1040,7 @@ export class CloudisenseApiClient extends ClientEventProvider implements IServic
      * 
      * @returns Promise that resolves with the assistant's introductory message.
      */
-    public smart_assist_introduce(): Promise<any>
-    {
+    public smart_assist_introduce(): Promise<any> {
         return new Promise((resolve, reject) => {
 
             let promise: Promise<any> = this.doRPC("assist_introduction", {});
@@ -1062,16 +1062,16 @@ export class CloudisenseApiClient extends ClientEventProvider implements IServic
      * @param authData 
      * @returns Promise
      */
-    public connectWithAuthData(authData:AuthData):Promise<any>{   
+    public connectWithAuthData(authData: AuthData): Promise<any> {
 
-        return new Promise((resolve,reject) => {
+        return new Promise((resolve, reject) => {
 
             this.__wsconnect(authData).then((wsclient) => {
                 resolve(wsclient);
             })
-            .catch((err) => {
-                reject(err);
-            });
+                .catch((err) => {
+                    reject(err);
+                });
 
         });
     }
@@ -1086,92 +1086,91 @@ export class CloudisenseApiClient extends ClientEventProvider implements IServic
      * @param password 
      * @returns 
      */
-    public connectWithCredentials(username:string, password:string):Promise<any>{        
+    public connectWithCredentials(username: string, password: string): Promise<any> {
 
-        return new Promise((resolve,reject) => {
+        return new Promise((resolve, reject) => {
 
             var hashed_password = sha256.create().update(password).hex();
             this.authenticate(username, hashed_password).then((res) => {
-                if(res.status == 200){
+                if (res.status == 200) {
                     const authData = plainToInstance(AuthData, res.data.data);
-                    this._authtime = new Date().getUTCMilliseconds()                    
+                    this._authtime = new Date().getUTCMilliseconds()
                     this.__wsconnect(authData).then((wsclient) => {
                         resolve(wsclient);
                     })
-                    .catch((err) => {
-                        reject(err);
-                    });
-                }else{
+                        .catch((err) => {
+                            reject(err);
+                        });
+                } else {
                     reject("Authentication failed with code " + res.status);
                 }
             }).catch((err) => {
-                this._errorCount++;              
-                const message:string = err.toString()
-                if(message.indexOf("ECONNREFUSED")>0){
-                    if(this.reconnectOnFailure){
+                this._errorCount++;
+                const message: string = err.toString()
+                if (message.indexOf("ECONNREFUSED") > 0) {
+                    if (this.reconnectOnFailure) {
                         this.attemptReconnect()
                     }
-                }else{
+                } else {
                     reject(err);
                 }
             })
-        });        
+        });
     }
 
 
 
-    private __wsconnect(tokenData:object):Promise<any> {
-        return new Promise((resolve,reject) => {
+    private __wsconnect(tokenData: object): Promise<any> {
+        return new Promise((resolve, reject) => {
 
 
             const socket_client = new WSClient({
                 host: this.host,
                 port: this.port,
-                authtoken:this.authdata.access.token
+                authtoken: this.authdata.access.token
             })
-            .connectService()
-            .then((client)=> {
-                this._errorCount = 0;
-                this._socketservice = client
-                this._onClientStateUpdate.dispatch(new ClientState(ClientStateType.CONNECTED))
-                this._socketservice.onChannelData.subscribe((data:any) => {
-                    this.processChannelData(data)
-                });
-                this._socketservice.onChannelState.subscribe((state:string) => {
-                    switch(state)
-                    {
-                        case CHANNEL_STATES.STATE_CHANNEL_ERROR:                                
-                        this._onClientStateUpdate.dispatch(new ClientState(ClientStateType.CONNECTION_ERROR)) 
-                        this._errorCount++;
-                        if(this.reconnectOnFailure){
-                            // try to connect again
-                            this.attemptReconnect();
+                .connectService()
+                .then((client) => {
+                    this._errorCount = 0;
+                    this._socketservice = client
+                    this._onClientStateUpdate.dispatch(new ClientState(ClientStateType.CONNECTED))
+                    this._socketservice.onChannelData.subscribe((data: any) => {
+                        this.processChannelData(data)
+                    });
+                    this._socketservice.onChannelState.subscribe((state: string) => {
+                        switch (state) {
+                            case CHANNEL_STATES.STATE_CHANNEL_ERROR:
+                                this._onClientStateUpdate.dispatch(new ClientState(ClientStateType.CONNECTION_ERROR))
+                                this._errorCount++;
+                                if (this.reconnectOnFailure) {
+                                    // try to connect again
+                                    this.attemptReconnect();
+                                }
+                                break;
+
+                            case CHANNEL_STATES.STATE_CHANNEL_DISCONNECTED:
+                                this._onClientStateUpdate.dispatch(new ClientState(ClientStateType.CONNECTION_TERMINATED))
+                                break;
+
+                            case CHANNEL_STATES.STATE_CHANNEL_CONNECTION_LOST:
+                                this._onClientStateUpdate.dispatch(new ClientState(ClientStateType.CONNECTION_LOST))
+                                if (this.reconnectOnFailure) {
+                                    // try to connect again                                    
+                                    this.attemptReconnect()
+                                }
+                                break;
+
+                            case CHANNEL_STATES.STATE_CHANNEL_CONNECTIING:
+                                this._onClientStateUpdate.dispatch(new ClientState(ClientStateType.CONNECTING))
+                                break;
                         }
-                        break;
+                    });
 
-                        case CHANNEL_STATES.STATE_CHANNEL_DISCONNECTED:
-                        this._onClientStateUpdate.dispatch(new ClientState(ClientStateType.CONNECTION_TERMINATED)) 
-                        break;
-
-                        case CHANNEL_STATES.STATE_CHANNEL_CONNECTION_LOST:
-                        this._onClientStateUpdate.dispatch(new ClientState(ClientStateType.CONNECTION_LOST)) 
-                        if(this.reconnectOnFailure){
-                            // try to connect again                                    
-                                this.attemptReconnect()
-                        }
-                        break;
-
-                        case CHANNEL_STATES.STATE_CHANNEL_CONNECTIING:
-                        this._onClientStateUpdate.dispatch(new ClientState(ClientStateType.CONNECTING)) 
-                        break;
-                    }
-                });
-
-                resolve(socket_client);
-            })
-            .catch((err)=> {
-                reject(err);
-            })
+                    resolve(socket_client);
+                })
+                .catch((err) => {
+                    reject(err);
+                })
         });
     }
 
@@ -1180,11 +1179,11 @@ export class CloudisenseApiClient extends ClientEventProvider implements IServic
      * Returns a boolean promise to help determine if socket si conencted or not
      * @returns 
      */
-    public connected():Promise<boolean>{   
-        return new Promise((resolve,reject) => {
-            if(this._socketservice && this._socketservice.is_connected()){
+    public connected(): Promise<boolean> {
+        return new Promise((resolve, reject) => {
+            if (this._socketservice && this._socketservice.is_connected()) {
                 resolve(true);
-            }else{
+            } else {
                 reject(false)
             }
         });
@@ -1196,12 +1195,12 @@ export class CloudisenseApiClient extends ClientEventProvider implements IServic
      * Disconnects the client if connected to the server, otherwise
      * throws error.
      */
-    public disconnect():Promise<any>{   
-        return new Promise((resolve,reject) => {
-            if(this._socketservice && this._socketservice.is_connected()){                
+    public disconnect(): Promise<any> {
+        return new Promise((resolve, reject) => {
+            if (this._socketservice && this._socketservice.is_connected()) {
                 this._socketservice.disconnectService();
-                resolve(this._socketservice);            
-            }else{
+                resolve(this._socketservice);
+            } else {
                 reject("Unable to disconnect service");
             }
         });
@@ -1212,21 +1211,19 @@ export class CloudisenseApiClient extends ClientEventProvider implements IServic
     /**
      * Attempts to reconenct back to service using last successful credentials
      */
-    private attemptReconnect():void
-    {
+    private attemptReconnect(): void {
         console.log("Attempting to reconnect")
 
-        if(this.authdata != undefined && this.authdata != null){
+        if (this.authdata != undefined && this.authdata != null) {
 
-            if(this._errorCount<CloudisenseApiClient.MAX_ERROR_TOLERANCE){
-                
+            if (this._errorCount < CloudisenseApiClient.MAX_ERROR_TOLERANCE) {
+
                 setTimeout(() => {
-                    this.connectWithAuthData(this.authdata);    
-                }, 5000);               
+                    this.connectWithAuthData(this.authdata);
+                }, 5000);
             }
-            else
-            {
-                throw new Error("too many connection failures")                                        
+            else {
+                throw new Error("too many connection failures")
             }
         }
     }
@@ -1238,42 +1235,40 @@ export class CloudisenseApiClient extends ClientEventProvider implements IServic
      * 
      * @param data 
      */
-    private processChannelData(data:any):void{
+    private processChannelData(data: any): void {
 
-        if(data["type"] == "event")
-        {
+        if (data["type"] == "event") {
             let notificationData = undefined;
-            let event:CloudisenseServiceEvent = data as CloudisenseServiceEvent                  
+            let event: CloudisenseServiceEvent = data as CloudisenseServiceEvent
             this._onClientStateUpdate.dispatch(new ClientState(ClientStateType.EVENT_RECEIVED))
 
-            
-            switch(event.name)
-            {
+
+            switch (event.name) {
                 case EVENTS.SERVER_PING_EVENT:
                     console.debug("Server ping message")
                     break;
-                
+
                 case EVENTS.TEXT_NOTIFICATION_EVENT:
                     this._onTextNotificationEvent.dispatchAsync(new CloudisenseClientSimpleNotificationEvent(event.topic, event.data, event.meta, event.timestamp))
-                    break;  
+                    break;
 
-                    
+
                 case EVENTS.EVENT_UI_UPDATE:
                     this._onUIEvent.dispatchAsync(new CloudisenseClientUIDataEvent(event.topic, event.data, event.meta, event.timestamp))
-                    this._dispatchTopicOrientedDataEvent(event) 
-                    break; 
+                    this._dispatchTopicOrientedDataEvent(event)
+                    break;
 
 
                 case EVENTS.TEXT_DATA_NOTIFICATION_EVENT:
                     this._onTextNotificationEvent.dispatchAsync(new CloudisenseClientSimpleNotificationEvent(event.topic, event.data, event.meta, event.timestamp))
-                    this._dispatchTopicOrientedDataEvent(event)                    
+                    this._dispatchTopicOrientedDataEvent(event)
                     break
 
-                
+
                 case EVENTS.ERROR_EVENT:
                     this._dispatchTopicOrientedErrorEvent(event)
                     break;
-                
+
                 case EVENTS.DATA_EVENT:
                     this._dispatchTopicOrientedDataEvent(event)
                     break;
@@ -1291,22 +1286,22 @@ export class CloudisenseApiClient extends ClientEventProvider implements IServic
      * Dispatches topic specific error event with topic specific data 
      * @param event 
      */
-    private _dispatchTopicOrientedErrorEvent(event:CloudisenseServiceEvent):void
-    {
-        const topic:string = event.topic
+    private _dispatchTopicOrientedErrorEvent(event: CloudisenseServiceEvent): void {
+        const topic: string = event.topic
 
-        switch(topic)
-        {
-            case (topic.startsWith(TOPIC_LOG_MONITORING))?topic:null:
-            case (topic.startsWith(TOPIC_SCRIPT_MONITORING))?topic:null:
-            case (topic.startsWith(TOPIC_STATS_MONITORING))?topic:null:
-            case (topic.startsWith(TOPIC_UI_UPDATES))?topic:null:
-            case (topic.startsWith(EVENTS.TOPIC_UI_INITIALIZATION))?topic:null:
-                this._topicevents.get(topic).dispatchAsync(this, new CloudisenseClientErrorEvent(event.topic, event.data, event.meta, event.timestamp))
+        switch (true) {
+            case topic.includes(TOPIC_LOG_MONITORING):
+            case topic.endsWith(TOPIC_SCRIPT_MONITORING):
+            case topic.endsWith(TOPIC_STATS_MONITORING):
+            case topic.endsWith(TOPIC_UI_UPDATES):
+            case topic.endsWith(EVENTS.TOPIC_UI_INITIALIZATION):
+                this._topicevents.get(topic)?.dispatchAsync(
+                    this, new CloudisenseClientErrorEvent(event.topic, event.data, event.meta, event.timestamp)
+                );
                 break;
 
             default:
-                console.error("Error for unexpected topic:"+topic)
+                console.error("Error for unexpected topic:", topic);
                 break;
         }
 
@@ -1319,42 +1314,48 @@ export class CloudisenseApiClient extends ClientEventProvider implements IServic
      * 
      * @param event 
      */
-    private _dispatchTopicOrientedDataEvent(event:CloudisenseServiceEvent):void
-    {        
-        const topic:string = event.topic
+    private _dispatchTopicOrientedDataEvent(event: CloudisenseServiceEvent): void {
+        const topic: string = event.topic
 
-        switch(topic)
-        {
-
-            case (topic.startsWith(TOPIC_LOG_MONITORING))?topic:null:
-                this._topicevents.get(topic).dispatchAsync(this, new CloudisenseClientLogDataEvent(event.topic, event.data, event.meta, event.timestamp))
+        switch (true) {
+            case topic.includes(TOPIC_LOG_MONITORING):
+                this._topicevents
+                    .get(topic)
+                    ?.dispatchAsync(this, new CloudisenseClientLogDataEvent(event.topic, event.data, event.meta, event.timestamp));
                 break;
 
-            case (topic.startsWith(TOPIC_SCRIPT_MONITORING))?topic:null:
-                this._topicevents.get(topic).dispatchAsync(this, new CloudisenseClientScriptDataEvent(event.topic, event.data, event.meta, event.timestamp))
+            case topic.endsWith(TOPIC_SCRIPT_MONITORING):
+                this._topicevents
+                    .get(topic)
+                    ?.dispatchAsync(this, new CloudisenseClientScriptDataEvent(event.topic, event.data, event.meta, event.timestamp));
                 break;
 
-            case (topic.startsWith(TOPIC_STATS_MONITORING))?topic:null:
-                this._topicevents.get(topic).dispatchAsync(this, new CloudisenseClientStatsDataEvent(event.topic, event.data, event.meta, event.timestamp))
+            case topic.endsWith(TOPIC_STATS_MONITORING):
+                this._topicevents
+                    .get(topic)
+                    ?.dispatchAsync(this, new CloudisenseClientStatsDataEvent(event.topic, event.data, event.meta, event.timestamp));
                 break;
 
-            case (topic.startsWith(TOPIC_UI_UPDATES))?topic:null:
-                this._topicevents.get(topic).dispatchAsync(this, new CloudisenseClientUIDataEvent(event.topic, event.data, event.meta, event.timestamp))
-                break;    
+            case topic.endsWith(TOPIC_UI_UPDATES):
+                this._topicevents
+                    .get(topic)
+                    ?.dispatchAsync(this, new CloudisenseClientUIDataEvent(event.topic, event.data, event.meta, event.timestamp));
+                break;
 
             default:
-                console.debug("Event for topic:"+topic)
+                console.debug("Event for topic:", topic);
                 break;
         }
+
     }
 
 
 
-    private getBaseAPIendPoint():string{
+    private getBaseAPIendPoint(): string {
         return this._restEndPoint;
     }
 
-    
+
 
     /**
      * Authenticates a user based on username and password
@@ -1363,39 +1364,38 @@ export class CloudisenseApiClient extends ClientEventProvider implements IServic
      * @param password 
      * @returns 
      */
-    private authenticate(username:string, password:string):Promise<any>{
+    private authenticate(username: string, password: string): Promise<any> {
 
-        return new Promise((resolve,reject) => {
+        return new Promise((resolve, reject) => {
 
             const url = this.getBaseAPIendPoint() + "/" + "authorize"
 
             const params = new URLSearchParams()
             params.append('username', username)
             params.append('password', password)
-    
+
             const config = {
                 headers: {
                     'Content-Type': 'application/x-www-form-urlencoded'
                 }
             }
-    
+
             const promise = axios.post(url, params, config)
-    
-            promise.then((result:any) => {
+
+            promise.then((result: any) => {
                 console.debug(result)
-                resolve(result)                
+                resolve(result)
             })
-            .catch((err:any) => {
-                console.error(err.toString())
-                reject(err)
-            })    
+                .catch((err: any) => {
+                    console.error(err.toString())
+                    reject(err)
+                })
         });
-    }    
+    }
 
 
 
-    public dispose():void
-    {
+    public dispose(): void {
         // TO DO cleanup
     }
 

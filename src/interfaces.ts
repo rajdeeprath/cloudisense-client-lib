@@ -45,7 +45,7 @@ export interface OSStats {
 
 
 export interface CPUStats {
-    
+
     frequency: string;
 
     count: number;
@@ -79,7 +79,7 @@ export interface MemoryStats {
 export interface DiskStats {
     mountpoint: string;
 
-    fstype:string;
+    fstype: string;
 
     total: string;
 
@@ -94,7 +94,7 @@ export interface DiskStats {
 export interface NetworkStats {
     id: string;
 
-    bytes_sent:number;
+    bytes_sent: number;
 
     bytes_recv: number;
 
@@ -107,7 +107,7 @@ export interface NetworkStats {
     errout: number;
 
     dropin: number;
-    
+
     dropout: number;
 }
 
@@ -127,48 +127,48 @@ export interface SystemStats {
 
 export interface SimpleNotificationObject {
     message: string,
-    type:number
-    timestamp:number
+    type: number
+    timestamp: number
 }
 
 export interface SimpleDataNotificationObject {
     data: object,
-    timestamp:number
+    timestamp: number
 }
 
 
 export interface DataNotificationObject {
     message: string,
-    type:number,
+    type: number,
     data: object,
-    timestamp:number
+    timestamp: number
 }
 
 
-export interface IRPC{
-    requestid:string,
-    type:string,
-    intent:string
-    params?:any
-    timestamp?:number
+export interface IRPC {
+    requestid: string,
+    type: string,
+    intent: string
+    params?: any
+    timestamp?: number
 }
 
 
 export interface ISocketServiceObject {
-    host:string,
-    port:number
-    authtoken:string,
-    queryparams?:string,
-    
+    host: string,
+    port: number
+    authtoken: string,
+    queryparams?: string,
+
 }
 
 
 export interface IClientChannel {
-    onUIEvent:ISimpleEvent<any>;
-    onTextNotification:ISimpleEvent<any>;
-    onTextDataNotification:ISimpleEvent<any>;
-    onServerData:ISimpleEvent<any>;
-    onClientStateUpdate:ISimpleEvent<ClientState>;
+    onUIEvent: ISimpleEvent<any>;
+    onTextNotification: ISimpleEvent<any>;
+    onTextDataNotification: ISimpleEvent<any>;
+    onServerData: ISimpleEvent<any>;
+    onClientStateUpdate: ISimpleEvent<ClientState>;
 }
 
 
@@ -193,7 +193,7 @@ export interface IServiceClient extends IClientChannel {
     subscribe_ui_updates(): Promise<any>;
     unsubscribe_stats(): Promise<any>;
     subscribe_log(topic: string): Promise<any>;
-    unsubscribe_log(topic: string): Promise<void>;
+    unsubscribe_log(topic: string): Promise<any>;
     download_log(logkey: string, mode: string): Promise<string>;
     get_system_services(): Promise<string[]>;
     start_service(name: string): Promise<void>;
@@ -202,7 +202,7 @@ export interface IServiceClient extends IClientChannel {
     execute_arbitrary_action(intent: string, params: any): Promise<void>;
     connectWithAuthData(authData: AuthData): Promise<any>;
     set_local_serviceId(value: string): Promise<any>;
-    set_target_serviceId(value: string):Promise<any>;
+    set_target_serviceId(value: string): Promise<any>;
     get local_serviceId(): string
     set local_serviceId(value: string);
     get target_serviceId(): string;
@@ -211,35 +211,35 @@ export interface IServiceClient extends IClientChannel {
 
 
 
-export interface IServiceChannel{
-    onChannelData:ISimpleEvent<any>,    
-    onChannelState:ISimpleEvent<any>
+export interface IServiceChannel {
+    onChannelData: ISimpleEvent<any>,
+    onChannelState: ISimpleEvent<any>
 }
 
 
 export interface IServiceSocket extends IServiceChannel {
-    host:string,
-    port:number
-    autoconnect?:boolean
-    queryparams?:string,
+    host: string,
+    port: number
+    autoconnect?: boolean
+    queryparams?: string,
 
-    getHost: ()=>string,
-    getPort: ()=>number,
-    connectService: ()=>Promise<any>,
-    disconnectService: ()=>void,
-    is_connected: ()=>boolean,
-    doRPC: (serviceId: string, methodName:string, params?:object)=>Promise<any>
+    getHost: () => string,
+    getPort: () => number,
+    connectService: () => Promise<any>,
+    disconnectService: () => void,
+    is_connected: () => boolean,
+    doRPC: (serviceId: string, methodName: string, params?: object) => Promise<any>
 }
 
 
 
 export interface IClientConfig {
-    host:string,
-    port:number
-    username?:string,
-    password?:string,
-    authdata?:AuthData,
-    autoconnect?:boolean,
+    host: string,
+    port: number
+    username?: string,
+    password?: string,
+    authdata?: AuthData,
+    autoconnect?: boolean,
     reconnectOnFailure?: boolean;
 }
 
